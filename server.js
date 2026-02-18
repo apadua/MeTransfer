@@ -30,6 +30,9 @@ const DATA_DIR = process.env.INSTALL_DIR || __dirname;
 const THUMBNAILS_DIR = path.join(DATA_DIR, 'thumbnails');
 const OG_CACHE_DIR   = path.join(DATA_DIR, 'og-cache');
 
+// UUID v4 validation regex — used by middleware and reconcileGalleries (must be declared early)
+const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 // Data store for galleries (in production, use a database)
 const galleries = new Map();
 
@@ -184,9 +187,6 @@ const uploadBackground = multer({
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
-
-// UUID v4 validation — prevents path traversal attacks on filesystem operations
-const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function validateGalleryId(req, res, next) {
     if (!UUID_V4_REGEX.test(req.params.galleryId)) {
