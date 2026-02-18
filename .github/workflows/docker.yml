@@ -3,6 +3,11 @@ name: Build and push Docker image
 on:
   push:
     branches: [main]
+    paths:
+      - 'server.js'
+      - 'package*.json'
+      - 'public/**'
+      - 'Dockerfile'
   schedule:
     - cron: '0 4 * * 1'  # Every Monday at 4am UTC — picks up base image updates
 
