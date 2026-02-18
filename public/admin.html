@@ -3,40 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MeTransfer — Photographer Dashboard</title>
+    <title>MeTransfer — Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Fraunces:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        *, *::before, *::after {
-            box-sizing: border-box;
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         :root {
-            --bg-primary: #0d0d0d;
-            --bg-secondary: #1a1a1a;
-            --bg-tertiary: #252525;
-            --text-primary: #f5f5f5;
-            --text-secondary: #a0a0a0;
-            --accent: #c9a87c;
-            --accent-hover: #dfc39e;
-            --success: #4a9c6d;
-            --danger: #c45c5c;
-            --border: #333;
-        }
-
-        html, body {
-            height: 100%;
+            --bg-primary: #0a0a0b;
+            --bg-secondary: #141416;
+            --bg-tertiary: #1c1c1f;
+            --text-primary: #f5f5f7;
+            --text-secondary: #a1a1a6;
+            --accent: #c9a962;
+            --accent-hover: #dfc07a;
+            --border: #2d2d30;
+            --success: #34c759;
+            --error: #ff453a;
         }
 
         body {
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Instrument Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
-            line-height: 1.6;
             min-height: 100vh;
+            line-height: 1.6;
         }
 
         .container {
@@ -47,193 +43,176 @@
 
         header {
             text-align: center;
-            margin-bottom: 60px;
-            padding-top: 40px;
+            margin-bottom: 48px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border);
         }
 
         h1 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 3.5rem;
-            font-weight: 300;
-            letter-spacing: 0.15em;
+            font-family: 'Fraunces', serif;
+            font-size: 2.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
             margin-bottom: 8px;
-            color: var(--text-primary);
         }
 
         .subtitle {
-            font-size: 0.85rem;
-            letter-spacing: 0.25em;
-            text-transform: uppercase;
             color: var(--text-secondary);
+            font-size: 1rem;
         }
 
-        .section {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 2px;
-            padding: 40px;
-            margin-bottom: 32px;
-        }
-
-        .section-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.5rem;
-            font-weight: 400;
-            letter-spacing: 0.1em;
-            margin-bottom: 24px;
-            color: var(--accent);
-        }
-
-        /* Login Screen */
-        .login-screen {
+        /* Login Modal */
+        .login-modal {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--bg-primary);
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            backdrop-filter: blur(8px);
         }
 
-        .login-screen.hidden {
+        .login-modal.hidden {
             display: none;
         }
 
-        .login-box {
+        .login-card {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            padding: 48px;
-            border-radius: 2px;
-            text-align: center;
+            border-radius: 16px;
+            padding: 40px;
+            width: 100%;
             max-width: 400px;
-            width: 90%;
+            text-align: center;
         }
 
-        .login-box h2 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 2rem;
-            font-weight: 300;
-            letter-spacing: 0.1em;
+        .login-card h2 {
+            font-family: 'Fraunces', serif;
             margin-bottom: 8px;
         }
 
-        .login-box p {
+        .login-card p {
             color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
+            font-size: 0.9rem;
         }
 
-        .login-box input {
+        .login-card input {
             width: 100%;
-            padding: 14px 16px;
+            padding: 14px 18px;
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
-            border-radius: 2px;
+            border-radius: 10px;
             color: var(--text-primary);
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.9rem;
+            font-size: 1rem;
             margin-bottom: 16px;
-            text-align: center;
-            letter-spacing: 0.1em;
+            transition: border-color 0.2s;
         }
 
-        .login-box input:focus {
+        .login-card input:focus {
             outline: none;
             border-color: var(--accent);
+        }
+
+        .login-card button {
+            width: 100%;
+            padding: 14px 24px;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .login-card button:hover {
+            background: var(--accent-hover);
         }
 
         .login-error {
-            color: var(--danger);
+            color: var(--error);
             font-size: 0.85rem;
-            margin-bottom: 16px;
+            margin-top: 12px;
             display: none;
         }
 
-        .login-error.active {
-            display: block;
+        /* Upload Section */
+        .upload-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 32px;
         }
 
-        .main-content {
-            display: none;
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .main-content.visible {
-            display: block;
-        }
-
-        /* Form Fields */
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
+        .section-title span {
+            width: 28px;
+            height: 28px;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 0.85rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
+            font-weight: 700;
         }
 
-        .form-group input {
+        .event-name-input {
             width: 100%;
-            padding: 14px 16px;
+            padding: 14px 18px;
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
-            border-radius: 2px;
+            border-radius: 10px;
             color: var(--text-primary);
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.95rem;
+            font-size: 1rem;
+            margin-bottom: 20px;
+            transition: border-color 0.2s;
         }
 
-        .form-group input:focus {
+        .event-name-input:focus {
             outline: none;
             border-color: var(--accent);
         }
 
-        /* Drop Zone */
         .drop-zone {
             border: 2px dashed var(--border);
-            border-radius: 2px;
-            padding: 80px 40px;
+            border-radius: 16px;
+            padding: 48px;
             text-align: center;
+            transition: all 0.3s;
             cursor: pointer;
-            transition: all 0.3s ease;
             background: var(--bg-tertiary);
-            position: relative;
         }
 
         .drop-zone:hover,
         .drop-zone.drag-over {
             border-color: var(--accent);
-            background: rgba(201, 168, 124, 0.05);
-        }
-
-        .drop-zone.drag-over {
-            transform: scale(1.01);
+            background: rgba(201, 169, 98, 0.05);
         }
 
         .drop-zone-icon {
             width: 64px;
             height: 64px;
-            margin: 0 auto 24px;
+            margin: 0 auto 16px;
             opacity: 0.6;
         }
 
-        .drop-zone-icon svg {
-            width: 100%;
-            height: 100%;
-            stroke: var(--accent);
-        }
-
         .drop-zone h3 {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.75rem;
-            font-weight: 400;
-            margin-bottom: 12px;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
         }
 
         .drop-zone p {
@@ -241,320 +220,442 @@
             font-size: 0.9rem;
         }
 
-        .drop-zone input {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        /* Upload Progress */
-        .upload-progress {
+        .file-input {
             display: none;
-            margin-top: 32px;
         }
 
-        .upload-progress.active {
-            display: block;
-        }
-
-        .progress-bar-container {
-            background: var(--bg-tertiary);
-            height: 4px;
-            border-radius: 2px;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-
-        .progress-bar {
-            height: 100%;
-            background: var(--accent);
-            width: 0%;
-            transition: width 0.3s ease;
-        }
-
-        .progress-text {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            text-align: center;
-        }
-
-        /* File List */
         .file-list {
+            margin-top: 20px;
             max-height: 200px;
             overflow-y: auto;
-            margin-top: 24px;
-            padding: 16px;
-            background: var(--bg-tertiary);
-            border-radius: 2px;
-            display: none;
-        }
-
-        .file-list.active {
-            display: block;
-        }
-
-        .file-list-header {
-            font-size: 0.85rem;
-            color: var(--accent);
-            margin-bottom: 12px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--border);
         }
 
         .file-item {
             display: flex;
             align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.85rem;
+            gap: 12px;
+            padding: 10px 14px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
         }
 
-        .file-item:last-child {
-            border-bottom: none;
-        }
-
-        .file-item-icon {
+        .file-item svg {
             width: 20px;
             height: 20px;
-            margin-right: 12px;
-            opacity: 0.6;
+            color: var(--accent);
         }
 
-        .file-item-name {
+        .file-item .file-name {
             flex: 1;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .file-item-size {
+        .file-item .file-size {
             color: var(--text-secondary);
-            margin-left: 12px;
+            font-size: 0.8rem;
+        }
+
+        .file-item .remove-file {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .file-item .remove-file:hover {
+            color: var(--error);
         }
 
         /* Background Upload */
-        .background-section {
-            margin-top: 32px;
-            padding-top: 32px;
+        .bg-upload-section {
+            margin-top: 24px;
+            padding-top: 24px;
             border-top: 1px solid var(--border);
         }
 
-        .background-preview {
-            display: none;
-            margin-top: 16px;
+        .bg-drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: var(--bg-tertiary);
             position: relative;
+            overflow: hidden;
         }
 
-        .background-preview.active {
+        .bg-drop-zone:hover,
+        .bg-drop-zone.drag-over {
+            border-color: var(--accent);
+            background: rgba(201, 169, 98, 0.05);
+        }
+
+        .bg-drop-zone.has-image {
+            padding: 0;
+            border-style: solid;
+        }
+
+        .bg-drop-zone-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .bg-drop-zone.has-image .bg-drop-zone-content {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .bg-drop-zone.has-image:hover .bg-drop-zone-content {
+            opacity: 1;
+        }
+
+        .bg-drop-zone svg {
+            width: 32px;
+            height: 32px;
+            opacity: 0.6;
+        }
+
+        .bg-drop-zone p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .bg-drop-zone.has-image p {
+            color: var(--text-primary);
+        }
+
+        .bg-preview {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
             display: block;
         }
 
-        .background-preview img {
-            max-width: 100%;
-            max-height: 200px;
-            border-radius: 2px;
-            object-fit: cover;
-        }
-
-        .background-preview .remove-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: var(--danger);
-            color: white;
-            border: none;
-            width: 28px;
-            height: 28px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Buttons */
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 14px 32px;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.8rem;
-            font-weight: 500;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-            border: none;
-            border-radius: 2px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
+        /* Create Button */
+        .create-btn {
+            width: 100%;
+            padding: 18px 32px;
             background: var(--accent);
             color: var(--bg-primary);
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 24px;
         }
 
-        .btn-primary:hover:not(:disabled) {
+        .create-btn:hover:not(:disabled) {
             background: var(--accent-hover);
+            transform: translateY(-2px);
         }
 
-        .btn-primary:disabled {
+        .create-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
-        .btn-secondary {
-            background: transparent;
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--accent);
-            color: var(--accent);
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-danger:hover {
-            opacity: 0.9;
-        }
-
-        .action-bar {
-            display: flex;
-            gap: 16px;
-            margin-top: 32px;
-            flex-wrap: wrap;
-        }
-
-        /* Result Panel */
-        .result-panel {
+        /* Progress */
+        .progress-container {
             display: none;
-            margin-top: 32px;
-            padding: 32px;
-            background: rgba(74, 156, 109, 0.1);
-            border: 1px solid var(--success);
-            border-radius: 2px;
+            margin-top: 20px;
         }
 
-        .result-panel.active {
+        .progress-container.visible {
             display: block;
-            animation: fadeIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            overflow: hidden;
         }
 
-        .result-title {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.25rem;
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-top: 8px;
+        }
+
+        /* Result */
+        .result-section {
+            display: none;
+            background: var(--bg-secondary);
+            border: 1px solid var(--success);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .result-section.visible {
+            display: block;
+        }
+
+        .result-section h3 {
             color: var(--success);
             margin-bottom: 16px;
+            font-size: 1.25rem;
+        }
+
+        .result-links {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin: 20px 0;
+        }
+
+        .link-row {
             display: flex;
             align-items: center;
             gap: 12px;
-        }
-
-        .result-title svg {
-            width: 24px;
-            height: 24px;
-        }
-
-        .url-container {
-            display: flex;
-            gap: 12px;
-            margin-top: 16px;
-        }
-
-        .url-input {
-            flex: 1;
-            padding: 14px 16px;
             background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 2px;
+            padding: 12px 16px;
+            border-radius: 10px;
+        }
+
+        .link-row label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            min-width: 80px;
+        }
+
+        .link-row input {
+            flex: 1;
+            background: none;
+            border: none;
             color: var(--text-primary);
-            font-family: 'Montserrat', sans-serif;
             font-size: 0.9rem;
         }
 
         .copy-btn {
-            padding: 14px 24px;
-            background: var(--success);
-            color: white;
+            padding: 8px 16px;
+            background: var(--accent);
+            color: var(--bg-primary);
             border: none;
-            border-radius: 2px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
             cursor: pointer;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.8rem;
-            font-weight: 500;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            transition: all 0.2s ease;
+            transition: background 0.2s;
         }
 
         .copy-btn:hover {
-            opacity: 0.9;
+            background: var(--accent-hover);
         }
 
-        .copy-btn.copied {
+        .new-upload-btn {
+            padding: 12px 24px;
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 16px;
+        }
+
+        .new-upload-btn:hover {
             background: var(--accent);
+            color: var(--bg-primary);
         }
 
         /* Galleries List */
-        .galleries-list {
-            margin-top: 24px;
+        .galleries-section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+        }
+
+        .gallery-list {
+            display: grid;
+            gap: 16px;
         }
 
         .gallery-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 20px;
+            gap: 16px;
+            padding: 16px 20px;
             background: var(--bg-tertiary);
-            border-radius: 2px;
-            margin-bottom: 12px;
-            transition: all 0.2s ease;
+            border-radius: 12px;
+            transition: transform 0.2s;
         }
 
         .gallery-item:hover {
-            background: rgba(201, 168, 124, 0.05);
+            transform: translateX(4px);
+        }
+
+        .gallery-cover {
+            width: 120px;
+            height: 80px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg-secondary);
+            flex-shrink: 0;
+            position: relative;
+            cursor: pointer;
+            border: 2px dashed var(--border);
+            transition: all 0.3s;
+        }
+
+        .gallery-cover:hover,
+        .gallery-cover.drag-over {
+            border-color: var(--accent);
+        }
+
+        .gallery-cover.has-image {
+            border-style: solid;
+            border-color: transparent;
+        }
+
+        .gallery-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .gallery-cover-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            text-align: center;
+            padding: 8px;
+        }
+
+        .gallery-cover-placeholder svg {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+            opacity: 0.5;
+        }
+
+        .gallery-cover.has-image .gallery-cover-placeholder {
+            background: rgba(0, 0, 0, 0.6);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .gallery-cover.has-image:hover .gallery-cover-placeholder {
+            opacity: 1;
+        }
+
+        .gallery-cover-placeholder span {
+            line-height: 1.2;
+        }
+
+        .gallery-cover input[type="file"] {
+            display: none;
         }
 
         .gallery-info {
             flex: 1;
+            min-width: 0;
         }
 
-        .gallery-event-name {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.25rem;
-            font-weight: 400;
-            color: var(--text-primary);
+        .gallery-name {
+            font-weight: 600;
             margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+            padding: 2px 6px;
+            margin: -2px -6px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .gallery-name:hover {
+            background: var(--bg-secondary);
+        }
+
+        .gallery-name-input {
+            font-weight: 600;
+            font-size: inherit;
+            font-family: inherit;
+            background: var(--bg-secondary);
+            border: 1px solid var(--accent);
+            border-radius: 4px;
+            color: var(--text-primary);
+            padding: 2px 6px;
+            margin: -3px -7px;
+            width: calc(100% + 14px);
+            outline: none;
         }
 
         .gallery-meta {
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
         }
 
         .gallery-actions {
             display: flex;
-            gap: 12px;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
         .gallery-actions button {
-            padding: 8px 16px;
-            font-size: 0.75rem;
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-copy {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+        }
+
+        .btn-copy:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-delete {
+            background: transparent;
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .btn-delete:hover {
+            background: var(--error);
+            color: white;
         }
 
         .empty-state {
@@ -563,45 +664,88 @@
             color: var(--text-secondary);
         }
 
-        /* Logout Button */
-        .logout-btn {
+        /* Upload status toast */
+        .upload-toast {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 8px 16px;
-            font-size: 0.7rem;
-            background: transparent;
+            bottom: 24px;
+            right: 24px;
+            background: var(--bg-secondary);
             border: 1px solid var(--border);
-            color: var(--text-secondary);
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.3s;
+            pointer-events: none;
         }
 
-        .logout-btn:hover {
-            border-color: var(--danger);
-            color: var(--danger);
+        .upload-toast.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .upload-toast.success {
+            border-color: var(--success);
+        }
+
+        .upload-toast.error {
+            border-color: var(--error);
+        }
+
+        .upload-toast-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .upload-toast-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .upload-toast-icon.success {
+            color: var(--success);
+        }
+
+        .upload-toast-icon.error {
+            color: var(--error);
         }
 
         /* Responsive */
         @media (max-width: 768px) {
+            .container {
+                padding: 24px 16px;
+            }
+
             h1 {
-                font-size: 2.5rem;
+                font-size: 2rem;
             }
 
-            .section {
-                padding: 24px;
-            }
-
-            .drop-zone {
-                padding: 48px 24px;
-            }
-
-            .url-container {
-                flex-direction: column;
+            .upload-section,
+            .galleries-section {
+                padding: 24px 20px;
             }
 
             .gallery-item {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 16px;
+            }
+
+            .gallery-cover {
+                width: 100%;
+                height: 120px;
             }
 
             .gallery-actions {
@@ -615,504 +759,633 @@
     </style>
 </head>
 <body>
-    <!-- Login Screen -->
-    <div class="login-screen" id="loginScreen">
-        <div class="login-box">
-            <h2>MeTransfer</h2>
-            <p>Enter admin password to continue</p>
-            <input type="password" id="passwordInput" placeholder="Password" autocomplete="off">
-            <p class="login-error" id="loginError">Invalid password. Please try again.</p>
-            <button class="btn btn-primary" id="loginBtn" style="width: 100%;">Enter</button>
+    <!-- Login Modal -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-card">
+            <h2>Welcome Back</h2>
+            <p>Enter your password to access the dashboard</p>
+            <input type="password" id="passwordInput" placeholder="Password" autofocus>
+            <button onclick="login()">Sign In</button>
+            <p class="login-error" id="loginError">Invalid password</p>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-content" id="mainContent">
-        <button class="btn logout-btn" id="logoutBtn">Logout</button>
-        
-        <div class="container">
-            <header>
-                <h1>MeTransfer</h1>
-                <p class="subtitle">Photographer Dashboard</p>
-            </header>
+    <!-- Upload Toast -->
+    <div class="upload-toast" id="uploadToast">
+        <div class="upload-toast-spinner" id="toastSpinner"></div>
+        <svg class="upload-toast-icon success" id="toastSuccess" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+            <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg class="upload-toast-icon error" id="toastError" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;">
+            <path d="M18 6L6 18M6 6l12 12" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span id="toastMessage">Uploading cover...</span>
+    </div>
 
-            <section class="section">
-                <h2 class="section-title">Create New Gallery</h2>
-                
-                <div class="form-group">
-                    <label for="eventName">Event Name</label>
-                    <input type="text" id="eventName" placeholder="e.g., Johnson Wedding, Senior Photos - Sarah">
+    <div class="container">
+        <header>
+            <h1>MeTransfer</h1>
+            <p class="subtitle">Create beautiful download links for your clients</p>
+        </header>
+
+        <!-- Result Section (shown after upload) -->
+        <div class="result-section" id="resultSection">
+            <h3>✓ Gallery Created Successfully!</h3>
+            <p id="resultEventName"></p>
+            <div class="result-links">
+                <div class="link-row">
+                    <label>Link:</label>
+                    <input type="text" id="downloadLinkInput" readonly>
+                    <button class="copy-btn" onclick="copyLink('downloadLinkInput')">Copy</button>
                 </div>
-                
-                <div class="drop-zone" id="dropZone">
-                    <div class="drop-zone-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+            </div>
+            <button class="new-upload-btn" onclick="resetForm()">Create Another Gallery</button>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section" id="uploadSection">
+            <div class="section-title">
+                <span>1</span> Event Details & Photos
+            </div>
+            
+            <input type="text" class="event-name-input" id="eventName" placeholder="Event Name (e.g., Johnson Wedding)">
+            
+            <div class="drop-zone" id="dropZone">
+                <svg class="drop-zone-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M12 16V4m0 0L8 8m4-4l4 4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <h3>Drop photos here</h3>
+                <p>or click to browse • Supports folders</p>
+            </div>
+            
+            <input type="file" class="file-input" id="fileInput" multiple accept="image/*">
+            
+            <div class="file-list" id="fileList"></div>
+            
+            <div class="bg-upload-section">
+                <div class="section-title">
+                    <span>2</span> Cover Image (Optional)
+                </div>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;">
+                    Add a hero image for the customer's download page
+                </p>
+                <div class="bg-drop-zone" id="bgDropZone">
+                    <img class="bg-preview" id="bgPreview" style="display: none;">
+                    <div class="bg-drop-zone-content">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <path d="M21 15l-5-5L5 21"/>
                         </svg>
-                    </div>
-                    <h3>Drop Photos Here</h3>
-                    <p>or click to browse • supports folders</p>
-                    <input type="file" id="fileInput" multiple accept="image/*" webkitdirectory directory>
-                </div>
-
-                <div class="file-list" id="fileList">
-                    <div class="file-list-header" id="fileListHeader"></div>
-                </div>
-
-                <div class="upload-progress" id="uploadProgress">
-                    <div class="progress-bar-container">
-                        <div class="progress-bar" id="progressBar"></div>
-                    </div>
-                    <p class="progress-text" id="progressText">Uploading...</p>
-                </div>
-
-                <div class="background-section">
-                    <h3 class="section-title" style="font-size: 1.1rem; margin-bottom: 16px;">Customer Background (Optional)</h3>
-                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 16px;">
-                        Upload a photo to display as the background on your customer's download page.
-                    </p>
-                    <label class="btn btn-secondary" style="display: inline-flex;">
-                        <span>Choose Background</span>
-                        <input type="file" id="backgroundInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display: none;">
-                    </label>
-                    <div class="background-preview" id="backgroundPreview">
-                        <img id="backgroundImg" src="" alt="Background preview">
-                        <button class="remove-btn" id="removeBackground">×</button>
+                        <p>Drop cover image here or click to browse</p>
                     </div>
                 </div>
-
-                <div class="action-bar">
-                    <button class="btn btn-primary" id="createGalleryBtn" disabled>Create Gallery & Get Link</button>
-                    <button class="btn btn-secondary" id="clearBtn">Clear All</button>
+                <input type="file" class="file-input" id="bgInput" accept="image/*">
+            </div>
+            
+            <button class="create-btn" id="createBtn" onclick="createGallery()" disabled>
+                Create Gallery & Get Link
+            </button>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
+                <p class="progress-text" id="progressText">Uploading...</p>
+            </div>
+        </div>
 
-                <div class="result-panel" id="resultPanel">
-                    <h3 class="result-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Gallery Created Successfully
-                    </h3>
-                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
-                        Share this link with your customer:
-                    </p>
-                    <div class="url-container">
-                        <input type="text" class="url-input" id="galleryUrl" readonly>
-                        <button class="copy-btn" id="copyBtn">Copy</button>
-                    </div>
-                </div>
-            </section>
-
-            <section class="section">
-                <h2 class="section-title">Your Galleries</h2>
-                <div class="galleries-list" id="galleriesList">
-                    <div class="empty-state">Loading galleries...</div>
-                </div>
-            </section>
+        <!-- Existing Galleries -->
+        <div class="galleries-section">
+            <div class="section-title">
+                Your Galleries
+            </div>
+            <div class="gallery-list" id="galleryList">
+                <div class="empty-state">Loading galleries...</div>
+            </div>
         </div>
     </div>
 
     <script>
-        // State
         let selectedFiles = [];
-        let backgroundFile = null;
+        let selectedBgFile = null;
         let adminPassword = '';
 
-        // Elements
-        const loginScreen = document.getElementById('loginScreen');
-        const mainContent = document.getElementById('mainContent');
-        const passwordInput = document.getElementById('passwordInput');
-        const loginBtn = document.getElementById('loginBtn');
-        const loginError = document.getElementById('loginError');
-        const logoutBtn = document.getElementById('logoutBtn');
-        const eventNameInput = document.getElementById('eventName');
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('fileInput');
-        const fileList = document.getElementById('fileList');
-        const fileListHeader = document.getElementById('fileListHeader');
-        const backgroundInput = document.getElementById('backgroundInput');
-        const backgroundPreview = document.getElementById('backgroundPreview');
-        const backgroundImg = document.getElementById('backgroundImg');
-        const removeBackground = document.getElementById('removeBackground');
-        const createGalleryBtn = document.getElementById('createGalleryBtn');
-        const clearBtn = document.getElementById('clearBtn');
-        const uploadProgress = document.getElementById('uploadProgress');
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const resultPanel = document.getElementById('resultPanel');
-        const galleryUrl = document.getElementById('galleryUrl');
-        const copyBtn = document.getElementById('copyBtn');
-        const galleriesList = document.getElementById('galleriesList');
-
-        // Check for saved session
+        // Check for saved password
         const savedPassword = sessionStorage.getItem('adminPassword');
         if (savedPassword) {
             adminPassword = savedPassword;
-            showMainContent();
+            document.getElementById('loginModal').classList.add('hidden');
+            loadGalleries();
         }
 
-        // Login handling
-        loginBtn.addEventListener('click', attemptLogin);
-        passwordInput.addEventListener('keypress', e => {
-            if (e.key === 'Enter') attemptLogin();
+        // Handle password input enter key
+        document.getElementById('passwordInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') login();
         });
 
-        async function attemptLogin() {
-            const password = passwordInput.value;
-            
+        async function login() {
+            const password = document.getElementById('passwordInput').value;
             try {
-                const response = await fetch('/api/auth/verify', {
+                const res = await fetch('/api/auth/verify', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ password })
                 });
                 
-                if (response.ok) {
+                if (res.ok) {
                     adminPassword = password;
                     sessionStorage.setItem('adminPassword', password);
-                    showMainContent();
+                    document.getElementById('loginModal').classList.add('hidden');
+                    loadGalleries();
                 } else {
-                    loginError.classList.add('active');
-                    passwordInput.value = '';
-                    passwordInput.focus();
+                    document.getElementById('loginError').style.display = 'block';
                 }
             } catch (err) {
-                loginError.classList.add('active');
+                document.getElementById('loginError').style.display = 'block';
             }
         }
 
-        function showMainContent() {
-            loginScreen.classList.add('hidden');
-            mainContent.classList.add('visible');
-            loadGalleries();
+        // Prevent default drag behaviors on document
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
         }
 
-        logoutBtn.addEventListener('click', () => {
-            adminPassword = '';
-            sessionStorage.removeItem('adminPassword');
-            loginScreen.classList.remove('hidden');
-            mainContent.classList.remove('visible');
-            passwordInput.value = '';
-            loginError.classList.remove('active');
+        // Photos drop zone
+        const dropZone = document.getElementById('dropZone');
+        
+        dropZone.addEventListener('click', () => document.getElementById('fileInput').click());
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'), false);
         });
 
-        // Helper to add auth header
-        function authHeaders() {
-            return { 'X-Admin-Password': adminPassword };
-        }
-
-        // Drag and drop
-        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
-            dropZone.addEventListener(event, e => {
-                e.preventDefault();
-                e.stopPropagation();
-            });
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'), false);
         });
 
-        ['dragenter', 'dragover'].forEach(event => {
-            dropZone.addEventListener(event, () => dropZone.classList.add('drag-over'));
-        });
+        dropZone.addEventListener('drop', handlePhotoDrop, false);
 
-        ['dragleave', 'drop'].forEach(event => {
-            dropZone.addEventListener(event, () => dropZone.classList.remove('drag-over'));
-        });
-
-        dropZone.addEventListener('drop', e => {
+        async function handlePhotoDrop(e) {
             const items = e.dataTransfer.items;
-            handleItems(items);
-        });
+            const files = [];
+            
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i].webkitGetAsEntry();
+                if (item) {
+                    await traverseFileTree(item, files);
+                }
+            }
+            
+            addFiles(files);
+        }
 
-        fileInput.addEventListener('change', e => {
+        async function traverseFileTree(item, files) {
+            return new Promise((resolve) => {
+                if (item.isFile) {
+                    item.file((file) => {
+                        if (file.type.startsWith('image/')) {
+                            files.push(file);
+                        }
+                        resolve();
+                    });
+                } else if (item.isDirectory) {
+                    const reader = item.createReader();
+                    reader.readEntries(async (entries) => {
+                        for (const entry of entries) {
+                            await traverseFileTree(entry, files);
+                        }
+                        resolve();
+                    });
+                } else {
+                    resolve();
+                }
+            });
+        }
+
+        // File input handling
+        document.getElementById('fileInput').addEventListener('change', (e) => {
             const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
             addFiles(files);
         });
 
-        async function handleItems(items) {
-            const files = [];
-            
-            async function traverseEntry(entry, path = '') {
-                return new Promise((resolve) => {
-                    if (entry.isFile) {
-                        entry.file(file => {
-                            if (file.type.startsWith('image/')) {
-                                files.push(file);
-                            }
-                            resolve();
-                        });
-                    } else if (entry.isDirectory) {
-                        const reader = entry.createReader();
-                        reader.readEntries(async entries => {
-                            for (const e of entries) {
-                                await traverseEntry(e, path + entry.name + '/');
-                            }
-                            resolve();
-                        });
-                    } else {
-                        resolve();
-                    }
-                });
-            }
-
-            const entries = [];
-            for (let i = 0; i < items.length; i++) {
-                const entry = items[i].webkitGetAsEntry();
-                if (entry) entries.push(entry);
-            }
-
-            for (const entry of entries) {
-                await traverseEntry(entry);
-            }
-
-            addFiles(files);
-        }
-
         function addFiles(files) {
             selectedFiles = [...selectedFiles, ...files];
             updateFileList();
-            updateCreateButton();
+            document.getElementById('createBtn').disabled = selectedFiles.length === 0;
         }
 
-        function formatSize(bytes) {
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFileList();
+            document.getElementById('createBtn').disabled = selectedFiles.length === 0;
+        }
+
+        function formatFileSize(bytes) {
             if (bytes < 1024) return bytes + ' B';
             if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
             return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
         }
 
         function updateFileList() {
+            const container = document.getElementById('fileList');
             if (selectedFiles.length === 0) {
-                fileList.classList.remove('active');
+                container.innerHTML = '';
                 return;
             }
-
-            fileList.classList.add('active');
-            fileListHeader.textContent = `${selectedFiles.length} photo${selectedFiles.length === 1 ? '' : 's'} selected`;
             
-            const itemsHtml = selectedFiles.map(file => `
+            container.innerHTML = selectedFiles.map((file, i) => `
                 <div class="file-item">
-                    <svg class="file-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2"/>
+                        <circle cx="8.5" cy="8.5" r="1.5"/>
+                        <path d="M21 15l-5-5L5 21"/>
                     </svg>
-                    <span class="file-item-name">${file.name}</span>
-                    <span class="file-item-size">${formatSize(file.size)}</span>
+                    <span class="file-name">${file.name}</span>
+                    <span class="file-size">${formatFileSize(file.size)}</span>
+                    <button class="remove-file" onclick="removeFile(${i})">✕</button>
                 </div>
             `).join('');
-            
-            fileList.innerHTML = `<div class="file-list-header">${selectedFiles.length} photo${selectedFiles.length === 1 ? '' : 's'} selected</div>` + itemsHtml;
         }
 
-        function updateCreateButton() {
-            createGalleryBtn.disabled = selectedFiles.length === 0;
-        }
+        // Background/Cover image drop zone
+        const bgDropZone = document.getElementById('bgDropZone');
+        const bgInput = document.getElementById('bgInput');
+        const bgPreview = document.getElementById('bgPreview');
 
-        // Background handling
-        backgroundInput.addEventListener('change', e => {
-            const file = e.target.files[0];
-            if (file) {
-                backgroundFile = file;
-                const reader = new FileReader();
-                reader.onload = e => {
-                    backgroundImg.src = e.target.result;
-                    backgroundPreview.classList.add('active');
-                };
-                reader.readAsDataURL(file);
+        bgDropZone.addEventListener('click', () => bgInput.click());
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            bgDropZone.addEventListener(eventName, () => bgDropZone.classList.add('drag-over'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            bgDropZone.addEventListener(eventName, () => bgDropZone.classList.remove('drag-over'), false);
+        });
+
+        bgDropZone.addEventListener('drop', (e) => {
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                handleBgFile(files[0]);
             }
         });
 
-        removeBackground.addEventListener('click', () => {
-            backgroundFile = null;
-            backgroundInput.value = '';
-            backgroundPreview.classList.remove('active');
+        bgInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleBgFile(e.target.files[0]);
+            }
         });
 
-        // Clear all
-        clearBtn.addEventListener('click', () => {
-            selectedFiles = [];
-            backgroundFile = null;
-            fileInput.value = '';
-            backgroundInput.value = '';
-            eventNameInput.value = '';
-            fileList.classList.remove('active');
-            backgroundPreview.classList.remove('active');
-            resultPanel.classList.remove('active');
-            updateCreateButton();
-        });
+        function handleBgFile(file) {
+            selectedBgFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                bgPreview.src = e.target.result;
+                bgPreview.style.display = 'block';
+                bgDropZone.classList.add('has-image');
+            };
+            reader.readAsDataURL(file);
+        }
 
-        // Create gallery
-        createGalleryBtn.addEventListener('click', async () => {
-            if (selectedFiles.length === 0) return;
-
-            createGalleryBtn.disabled = true;
-            uploadProgress.classList.add('active');
-            resultPanel.classList.remove('active');
-
+        async function createGallery() {
+            const eventName = document.getElementById('eventName').value.trim() || 'Untitled Event';
+            
+            const formData = new FormData();
+            formData.append('eventName', eventName);
+            selectedFiles.forEach(file => formData.append('photos', file));
+            
+            document.getElementById('createBtn').disabled = true;
+            document.getElementById('progressContainer').classList.add('visible');
+            
             try {
-                // Create FormData with photos
-                const formData = new FormData();
-                formData.append('eventName', eventNameInput.value || 'Untitled Event');
-                selectedFiles.forEach(file => {
-                    formData.append('photos', file);
-                });
-
                 // Upload photos
-                progressText.textContent = 'Uploading photos...';
-                progressBar.style.width = '0%';
-
-                const response = await fetch('/api/gallery/create', {
-                    method: 'POST',
-                    headers: authHeaders(),
-                    body: formData
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/api/gallery/create');
+                xhr.setRequestHeader('X-Admin-Password', adminPassword);
+                
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        const pct = Math.round((e.loaded / e.total) * 100);
+                        document.getElementById('progressFill').style.width = pct + '%';
+                        document.getElementById('progressText').textContent = `Uploading... ${pct}%`;
+                    }
+                };
+                
+                const result = await new Promise((resolve, reject) => {
+                    xhr.onload = () => {
+                        if (xhr.status === 200) {
+                            resolve(JSON.parse(xhr.responseText));
+                        } else {
+                            reject(new Error('Upload failed'));
+                        }
+                    };
+                    xhr.onerror = () => reject(new Error('Upload failed'));
+                    xhr.send(formData);
                 });
-
-                if (!response.ok) throw new Error('Upload failed');
-
-                const result = await response.json();
-                progressBar.style.width = '80%';
-
+                
                 // Upload background if selected
-                if (backgroundFile) {
-                    progressText.textContent = 'Uploading background...';
-                    
+                if (selectedBgFile) {
+                    document.getElementById('progressText').textContent = 'Uploading cover image...';
                     const bgFormData = new FormData();
-                    bgFormData.append('background', backgroundFile);
-
+                    bgFormData.append('background', selectedBgFile);
+                    
                     await fetch(`/api/gallery/${result.galleryId}/background`, {
                         method: 'POST',
-                        headers: authHeaders(),
+                        headers: { 'X-Admin-Password': adminPassword },
                         body: bgFormData
                     });
                 }
-
-                progressBar.style.width = '100%';
-                progressText.textContent = 'Complete!';
-
+                
                 // Show result
-                setTimeout(() => {
-                    uploadProgress.classList.remove('active');
-                    resultPanel.classList.add('active');
-                    galleryUrl.value = result.downloadUrl;
-                    
-                    // Clear form for next upload
-                    selectedFiles = [];
-                    backgroundFile = null;
-                    fileInput.value = '';
-                    backgroundInput.value = '';
-                    eventNameInput.value = '';
-                    fileList.classList.remove('active');
-                    backgroundPreview.classList.remove('active');
-                    updateCreateButton();
-                    
-                    loadGalleries();
-                }, 500);
-
-            } catch (error) {
-                console.error(error);
-                progressText.textContent = 'Upload failed. Please try again.';
-                progressBar.style.width = '0%';
+                const baseUrl = window.location.origin;
+                document.getElementById('downloadLinkInput').value = `${baseUrl}/download/${result.galleryId}`;
+                document.getElementById('resultEventName').textContent = `${eventName} • ${result.fileCount} photos`;
+                
+                document.getElementById('uploadSection').style.display = 'none';
+                document.getElementById('resultSection').classList.add('visible');
+                
+                loadGalleries();
+                
+            } catch (err) {
+                alert('Error creating gallery: ' + err.message);
+            } finally {
+                document.getElementById('progressContainer').classList.remove('visible');
             }
-
-            createGalleryBtn.disabled = false;
-        });
-
-        // Copy URL
-        copyBtn.addEventListener('click', () => {
-            galleryUrl.select();
-            document.execCommand('copy');
-            copyBtn.textContent = 'Copied!';
-            copyBtn.classList.add('copied');
-            setTimeout(() => {
-                copyBtn.textContent = 'Copy';
-                copyBtn.classList.remove('copied');
-            }, 2000);
-        });
-
-        // Format date nicely
-        function formatDateTime(dateStr) {
-            const date = new Date(dateStr);
-            const options = { 
-                year: 'numeric', 
-                month: 'short', 
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-            };
-            return date.toLocaleString('en-US', options);
         }
 
-        // Load galleries
+        function resetForm() {
+            selectedFiles = [];
+            selectedBgFile = null;
+            document.getElementById('fileList').innerHTML = '';
+            document.getElementById('eventName').value = '';
+            document.getElementById('bgInput').value = '';
+            document.getElementById('bgPreview').style.display = 'none';
+            document.getElementById('bgDropZone').classList.remove('has-image');
+            document.getElementById('createBtn').disabled = true;
+            document.getElementById('progressFill').style.width = '0%';
+            document.getElementById('resultSection').classList.remove('visible');
+            document.getElementById('uploadSection').style.display = 'block';
+        }
+
+        function copyLink(inputId) {
+            const input = document.getElementById(inputId);
+            input.select();
+            navigator.clipboard.writeText(input.value);
+            
+            const btn = input.nextElementSibling;
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy', 2000);
+        }
+
         async function loadGalleries() {
             try {
-                const response = await fetch('/api/galleries', {
-                    headers: authHeaders()
+                const res = await fetch('/api/galleries', {
+                    headers: { 'X-Admin-Password': adminPassword }
                 });
                 
-                if (!response.ok) {
-                    if (response.status === 401) {
-                        // Session expired
-                        logoutBtn.click();
-                        return;
-                    }
-                    throw new Error('Failed to load galleries');
-                }
+                if (!res.ok) throw new Error('Failed to load galleries');
                 
-                const galleries = await response.json();
-
+                const galleries = await res.json();
+                const container = document.getElementById('galleryList');
+                
                 if (galleries.length === 0) {
-                    galleriesList.innerHTML = '<div class="empty-state">No galleries yet. Create your first one above!</div>';
+                    container.innerHTML = '<div class="empty-state">No galleries yet. Create your first one above!</div>';
                     return;
                 }
-
-                galleriesList.innerHTML = galleries.map(gallery => `
-                    <div class="gallery-item" data-id="${gallery.id}">
-                        <div class="gallery-info">
-                            <div class="gallery-event-name">${escapeHtml(gallery.eventName)}</div>
-                            <div class="gallery-meta">
-                                Uploaded ${formatDateTime(gallery.created)}
+                
+                container.innerHTML = galleries.map(g => `
+                    <div class="gallery-item">
+                        <div class="gallery-cover ${g.hasBackground ? 'has-image' : ''}" 
+                             id="cover-${g.id}"
+                             onclick="document.getElementById('cover-input-${g.id}').click()"
+                             ondragover="handleCoverDragOver(event, '${g.id}')"
+                             ondragleave="handleCoverDragLeave(event, '${g.id}')"
+                             ondrop="handleCoverDrop(event, '${g.id}')">
+                            ${g.hasBackground 
+                                ? `<img src="/api/gallery/${g.id}/background?t=${Date.now()}" alt="Cover">`
+                                : ''
+                            }
+                            <div class="gallery-cover-placeholder">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                                    <path d="M21 15l-5-5L5 21"/>
+                                </svg>
+                                <span>${g.hasBackground ? 'Change cover' : 'Drop cover'}</span>
                             </div>
+                            <input type="file" id="cover-input-${g.id}" accept="image/*" 
+                                   onchange="handleCoverSelect(event, '${g.id}')" style="display:none;">
+                        </div>
+                        <div class="gallery-info">
+                            <div class="gallery-name" onclick="startEditGalleryName('${g.id}', this)" title="Click to rename">${g.eventName}</div>
+                            <div class="gallery-meta">${g.fileCount} photos • ${new Date(g.created).toLocaleDateString()}</div>
                         </div>
                         <div class="gallery-actions">
-                            <button class="btn btn-secondary copy-gallery-url" data-url="${gallery.downloadUrl}">Copy Link</button>
-                            <button class="btn btn-danger delete-gallery">Delete</button>
+                            <button class="btn-copy" onclick="copyGalleryLink('${g.id}', 'download', this)">Copy Link</button>
+                            <button class="btn-delete" onclick="deleteGallery('${g.id}')">Delete</button>
                         </div>
                     </div>
                 `).join('');
-
-                // Add event listeners
-                document.querySelectorAll('.copy-gallery-url').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        const url = btn.dataset.url;
-                        navigator.clipboard.writeText(url);
-                        btn.textContent = 'Copied!';
-                        setTimeout(() => btn.textContent = 'Copy Link', 2000);
-                    });
-                });
-
-                document.querySelectorAll('.delete-gallery').forEach(btn => {
-                    btn.addEventListener('click', async () => {
-                        const item = btn.closest('.gallery-item');
-                        const id = item.dataset.id;
-                        
-                        if (confirm('Delete this gallery? This cannot be undone.')) {
-                            await fetch(`/api/gallery/${id}`, { 
-                                method: 'DELETE',
-                                headers: authHeaders()
-                            });
-                            loadGalleries();
-                        }
-                    });
-                });
-
-            } catch (error) {
-                console.error(error);
-                galleriesList.innerHTML = '<div class="empty-state">Failed to load galleries</div>';
+            } catch (err) {
+                console.error('Error loading galleries:', err);
             }
         }
 
-        // Helper to escape HTML
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
+        function handleCoverDragOver(e, galleryId) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById(`cover-${galleryId}`).classList.add('drag-over');
+        }
+
+        function handleCoverDragLeave(e, galleryId) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById(`cover-${galleryId}`).classList.remove('drag-over');
+        }
+
+        function handleCoverDrop(e, galleryId) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById(`cover-${galleryId}`).classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                uploadCoverImage(galleryId, files[0]);
+            }
+        }
+
+        function handleCoverSelect(e, galleryId) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                uploadCoverImage(galleryId, files[0]);
+            }
+        }
+
+        async function uploadCoverImage(galleryId, file) {
+            const toast = document.getElementById('uploadToast');
+            const spinner = document.getElementById('toastSpinner');
+            const successIcon = document.getElementById('toastSuccess');
+            const errorIcon = document.getElementById('toastError');
+            const message = document.getElementById('toastMessage');
+
+            // Show uploading state
+            spinner.style.display = 'block';
+            successIcon.style.display = 'none';
+            errorIcon.style.display = 'none';
+            message.textContent = 'Uploading cover...';
+            toast.className = 'upload-toast visible';
+
+            try {
+                const formData = new FormData();
+                formData.append('background', file);
+
+                const res = await fetch(`/api/gallery/${galleryId}/background`, {
+                    method: 'POST',
+                    headers: { 'X-Admin-Password': adminPassword },
+                    body: formData
+                });
+
+                if (!res.ok) throw new Error('Upload failed');
+
+                // Show success
+                spinner.style.display = 'none';
+                successIcon.style.display = 'block';
+                message.textContent = 'Cover updated!';
+                toast.classList.add('success');
+
+                // Reload galleries to show new cover
+                loadGalleries();
+
+                // Hide toast after delay
+                setTimeout(() => {
+                    toast.classList.remove('visible', 'success');
+                }, 2000);
+
+            } catch (err) {
+                // Show error
+                spinner.style.display = 'none';
+                errorIcon.style.display = 'block';
+                message.textContent = 'Upload failed';
+                toast.classList.add('error');
+
+                setTimeout(() => {
+                    toast.classList.remove('visible', 'error');
+                }, 3000);
+            }
+        }
+
+        function copyGalleryLink(id, type, btn) {
+            const url = `${window.location.origin}/${type}/${id}`;
+            navigator.clipboard.writeText(url);
+            btn.textContent = 'Copied!';
+            setTimeout(() => btn.textContent = 'Copy Link', 2000);
+        }
+
+        function startEditGalleryName(galleryId, element) {
+            const currentName = element.textContent;
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'gallery-name-input';
+            input.value = currentName;
+            
+            element.replaceWith(input);
+            input.focus();
+            input.select();
+
+            async function saveEdit() {
+                const newName = input.value.trim() || 'Untitled Event';
+                if (newName !== currentName) {
+                    await renameGallery(galleryId, newName);
+                } else {
+                    // Restore original without API call
+                    const span = document.createElement('div');
+                    span.className = 'gallery-name';
+                    span.textContent = currentName;
+                    span.setAttribute('onclick', `startEditGalleryName('${galleryId}', this)`);
+                    span.setAttribute('title', 'Click to rename');
+                    input.replaceWith(span);
+                }
+            }
+
+            input.addEventListener('blur', saveEdit);
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    input.blur();
+                } else if (e.key === 'Escape') {
+                    input.value = currentName;
+                    input.blur();
+                }
+            });
+        }
+
+        async function renameGallery(galleryId, newName) {
+            const toast = document.getElementById('uploadToast');
+            const spinner = document.getElementById('toastSpinner');
+            const successIcon = document.getElementById('toastSuccess');
+            const errorIcon = document.getElementById('toastError');
+            const message = document.getElementById('toastMessage');
+
+            spinner.style.display = 'block';
+            successIcon.style.display = 'none';
+            errorIcon.style.display = 'none';
+            message.textContent = 'Renaming...';
+            toast.className = 'upload-toast visible';
+
+            try {
+                const res = await fetch(`/api/gallery/${galleryId}/rename`, {
+                    method: 'POST',
+                    headers: { 
+                        'X-Admin-Password': adminPassword,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ eventName: newName })
+                });
+
+                if (!res.ok) throw new Error('Rename failed');
+
+                spinner.style.display = 'none';
+                successIcon.style.display = 'block';
+                message.textContent = 'Renamed!';
+                toast.classList.add('success');
+
+                loadGalleries();
+
+                setTimeout(() => {
+                    toast.classList.remove('visible', 'success');
+                }, 2000);
+
+            } catch (err) {
+                spinner.style.display = 'none';
+                errorIcon.style.display = 'block';
+                message.textContent = 'Rename failed';
+                toast.classList.add('error');
+
+                loadGalleries();
+
+                setTimeout(() => {
+                    toast.classList.remove('visible', 'error');
+                }, 3000);
+            }
+        }
+
+        async function deleteGallery(id) {
+            if (!confirm('Delete this gallery? This cannot be undone.')) return;
+            
+            try {
+                await fetch(`/api/gallery/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-Admin-Password': adminPassword }
+                });
+                loadGalleries();
+            } catch (err) {
+                alert('Error deleting gallery');
+            }
         }
     </script>
 </body>

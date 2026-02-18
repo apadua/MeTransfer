@@ -12,5 +12,8 @@ uploads/
 backgrounds/
 galleries.json
 
+# Old branch reference code (local only)
+oldbranch/
+
 # macOS
 .DS_Store
