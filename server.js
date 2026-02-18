@@ -12,11 +12,27 @@ const sharp = require('sharp');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Trust X-Forwarded-Proto from reverse proxies so req.protocol is correct behind Nginx/SSL
-app.set('trust proxy', 1);
+// Trust reverse-proxy headers (X-Forwarded-For, X-Forwarded-Proto) when TRUST_PROXY=1 in .env.
+// Set to 1 when running behind Nginx/Caddy/Traefik; leave unset for direct exposure.
+const TRUST_PROXY = parseInt(process.env.TRUST_PROXY || '0', 10);
+if (TRUST_PROXY > 0) {
+    app.set('trust proxy', TRUST_PROXY);
+}
 
-// Admin password loaded from .env file
+// Security headers — applied to every response
+app.use((_req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    next();
+});
+
+// Admin password loaded from .env file — must be set or the server refuses to start
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+if (!ADMIN_PASSWORD) {
+    console.error('FATAL: ADMIN_PASSWORD environment variable is not set. Set it in your .env file.');
+    process.exit(1);
+}
 
 // File size limits (from .env, in MB)
 const MAX_PHOTO_BYTES = parseInt(process.env.MAX_UPLOAD_MB || '200') * 1024 * 1024;
@@ -116,7 +132,9 @@ function escapeAttr(str) {
     return String(str)
         .replace(/&/g, '&amp;')
         .replace(/"/g, '&quot;')
-        .replace(/</g, '&lt;');
+        .replace(/'/g, '&#x27;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
 }
 
 // Generate a 400px-wide JPEG thumbnail for a single photo
@@ -224,6 +242,16 @@ const authLimiter = rateLimit({
     message: { error: 'Too many login attempts, please try again in 15 minutes' }
 });
 
+// Rate limiter for public image-generation endpoints — 600 requests per minute per IP
+// Prevents abuse of CPU-intensive sharp processing on unauthenticated routes
+const imageLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 600,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many image requests, please slow down' }
+});
+
 // --- Routes ---
 
 // Verify password endpoint
@@ -270,7 +298,7 @@ app.post('/api/gallery/create', requireAuth, generateGalleryId, upload.array('ph
 
     if (gallery) {
         gallery.files = req.files.map(f => f.filename);
-        gallery.eventName = req.body.eventName || 'Untitled Event';
+        gallery.eventName = (String(req.body.eventName || 'Untitled Event')).trim().substring(0, 200);
         saveGalleries();
         generateGalleryThumbnails(galleryId, gallery.files).catch(() => {});
     }
@@ -424,7 +452,7 @@ app.get('/api/gallery/:galleryId/photos', validateGalleryId, (req, res) => {
 });
 
 // Serve a single photo (original or thumbnail)
-app.get('/api/gallery/:galleryId/photo/:filename', validateGalleryId, validateFilename, async (req, res) => {
+app.get('/api/gallery/:galleryId/photo/:filename', imageLimiter, validateGalleryId, validateFilename, async (req, res) => {
     const { galleryId, filename } = req.params;
 
     if (req.query.thumb === '1') {
@@ -461,7 +489,7 @@ app.get('/api/gallery/:galleryId/download/:filename', validateGalleryId, validat
 });
 
 // Serve/generate OG image (1200×630 JPEG, cached)
-app.get('/api/gallery/:galleryId/og-image', validateGalleryId, async (req, res) => {
+app.get('/api/gallery/:galleryId/og-image', imageLimiter, validateGalleryId, async (req, res) => {
     const { galleryId } = req.params;
     const cacheFile = path.join(OG_CACHE_DIR, `${galleryId}.jpg`);
 
@@ -688,10 +716,15 @@ app.delete('/api/gallery/:galleryId', requireAuth, validateGalleryId, (req, res)
     res.json({ success: true });
 });
 
-// Error handling
+// Error handling — never expose internal details (file paths, stack traces) to the client
 app.use((err, req, res, next) => {
     console.error(err);
-    res.status(500).json({ error: err.message });
+    const status = err.status || err.statusCode || 500;
+    // Multer errors have a user-safe code; surface only those
+    if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ error: 'File too large' });
+    }
+    res.status(status).json({ error: 'Internal server error' });
 });
 
 app.listen(PORT, () => {

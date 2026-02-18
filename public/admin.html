@@ -1139,6 +1139,12 @@
             document.getElementById('uploadSection').style.display = 'block';
         }
 
+        function escapeHtml(str) {
+            const d = document.createElement('div');
+            d.textContent = String(str);
+            return d.innerHTML;
+        }
+
         // Works on both HTTP and HTTPS by falling back to execCommand when
         // the Clipboard API is unavailable (requires a secure context).
         function copyToClipboard(text) {
@@ -1204,7 +1210,7 @@
                                    onchange="handleCoverSelect(event, '${g.id}')" style="display:none;">
                         </div>
                         <div class="gallery-info">
-                            <div class="gallery-name" onclick="startEditGalleryName('${g.id}', this)" title="Click to rename">${g.eventName}</div>
+                            <div class="gallery-name" onclick="startEditGalleryName('${g.id}', this)" title="Click to rename">${escapeHtml(g.eventName)}</div>
                             <div class="gallery-meta">${g.fileCount} photos • ${new Date(g.created).toLocaleDateString()}</div>
                         </div>
                         <div class="gallery-actions">

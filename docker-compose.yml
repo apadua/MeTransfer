@@ -9,5 +9,6 @@ services:
       - ADMIN_PASSWORD=${ADMIN_PASSWORD}
       - MAX_UPLOAD_MB=${MAX_UPLOAD_MB:-200}
       - MAX_BACKGROUND_MB=${MAX_BACKGROUND_MB:-20}
+      - TRUST_PROXY=${TRUST_PROXY:-1}
     volumes:
       - ${GALLERY_DIR:-./data}:/data # Set GALLERY_DIR in .env to change where data is stored on the host.
