@@ -37,15 +37,7 @@ node -v
 
 ### 2. Clone the repository
 
-On a **local machine**, clone into your home directory:
-
-```bash
-cd ~
-git clone https://github.com/apadua/metransfer.git
-cd metransfer
-```
-
-On a **VPS or server**, `/opt` is the conventional location for self-contained applications:
+`/opt` is the conventional location for self-contained applications on a server:
 
 ```bash
 cd /opt
