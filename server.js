@@ -54,7 +54,46 @@ function saveGalleries() {
     fs.writeFileSync(GALLERIES_FILE, JSON.stringify(data, null, 2));
 }
 
+// Reconcile galleries.json with the uploads directory on disk.
+// Runs once on startup to handle two cases:
+//   1. Entry in JSON but no uploads folder → remove the stale entry
+//   2. Uploads folder exists but no JSON entry → recover with placeholder metadata
+function reconcileGalleries() {
+    const uploadsDir = path.join(DATA_DIR, 'uploads');
+    let changed = false;
+
+    // Case 1: stale JSON entries with no corresponding uploads folder
+    for (const galleryId of galleries.keys()) {
+        if (!fs.existsSync(path.join(uploadsDir, galleryId))) {
+            galleries.delete(galleryId);
+            changed = true;
+        }
+    }
+
+    // Case 2: uploads folders on disk with no JSON entry
+    if (fs.existsSync(uploadsDir)) {
+        for (const entry of fs.readdirSync(uploadsDir)) {
+            if (!UUID_V4_REGEX.test(entry)) continue;
+            if (galleries.has(entry)) continue;
+            const galleryPath = path.join(uploadsDir, entry);
+            if (!fs.statSync(galleryPath).isDirectory()) continue;
+            const files = fs.readdirSync(galleryPath).filter(f => !f.startsWith('.'));
+            galleries.set(entry, {
+                id: entry,
+                eventName: 'Untitled Event',
+                created: fs.statSync(galleryPath).birthtime.toISOString(),
+                files,
+                background: null
+            });
+            changed = true;
+        }
+    }
+
+    if (changed) saveGalleries();
+}
+
 loadGalleries();
+reconcileGalleries();
 
 // Ensure directories exist
 ['uploads', 'backgrounds', 'thumbnails', 'og-cache'].forEach(dir => {
