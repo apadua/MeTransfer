@@ -13,9 +13,138 @@ A self-hosted photo delivery platform for photographers. Upload photos, share a 
 
 ---
 
-## Installation
+## Quick Start (Docker Compose)
 
-### 1. Install Node.js (if not already installed)
+This is the recommended installation method. You only need Docker installed.
+
+### 1. Create a project directory
+
+```bash
+mkdir metransfer && cd metransfer
+```
+
+### 2. Create your `.env` file
+
+```bash
+cat > .env <<'EOF'
+ADMIN_PASSWORD=your_secure_password_here
+PORT=3000
+HOST=localhost
+MAX_UPLOAD_MB=200
+MAX_BACKGROUND_MB=20
+EOF
+```
+
+### 3. Start the container
+
+```bash
+docker compose up -d
+```
+
+MeTransfer is now running at `http://localhost:3000`. Gallery data is stored in `./data/` and persists across container restarts and upgrades.
+
+### Updating
+
+```bash
+docker compose pull && docker compose up -d
+```
+
+---
+
+## Configuration
+
+All settings live in `.env`. Copy `.env.example` to get started — never commit `.env` to version control.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ADMIN_PASSWORD` | *(required)* | Password to access the admin dashboard |
+| `PORT` | `3000` | TCP port the server listens on |
+| `HOST` | `localhost` | Hostname shown in the startup log |
+| `MAX_UPLOAD_MB` | `200` | Max size per photo file, in MB |
+| `MAX_BACKGROUND_MB` | `20` | Max size for background images, in MB |
+| `DATA_DIR` | *(project root)* | Directory for uploads, backgrounds, and galleries.json. Set to `/data` in Docker deployments. |
+
+---
+
+## Usage
+
+1. **Open the Dashboard** — go to `http://localhost:3000`
+2. **Log in** — enter your admin password
+3. **Enter an Event Name** — e.g. "Johnson Wedding" or "Senior Photos — Sarah"
+4. **Upload Photos** — drag and drop files or entire folders onto the upload zone
+5. **Add a Background** *(optional)* — click "Choose Background" to upload a hero image shown on the client page
+6. **Create Gallery** — click "Create Gallery & Get Link"
+7. **Share** — copy the generated link and send it to your client
+
+### What your client sees
+
+When your client opens the link they see:
+- Your custom background image (if uploaded)
+- The event name as the page title
+- A single "Download All" button
+- Their photos arrive as one ZIP file
+
+---
+
+## Deployment
+
+### Behind Nginx (free SSL with Let's Encrypt)
+
+Install Nginx and Certbot:
+
+```bash
+sudo apt install -y nginx certbot python3-certbot-nginx
+```
+
+Create a site config:
+
+```bash
+sudo nano /etc/nginx/sites-available/metransfer
+```
+
+Paste:
+
+```nginx
+server {
+    listen 80;
+    server_name photos.yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_cache_bypass $http_upgrade;
+
+        # Required for large photo uploads
+        client_max_body_size 500M;
+    }
+}
+```
+
+Enable and reload:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/metransfer /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+Get a free SSL certificate:
+
+```bash
+sudo certbot --nginx -d photos.yourdomain.com
+```
+
+Certbot will automatically renew the certificate. MeTransfer is now accessible at `https://photos.yourdomain.com`.
+
+---
+
+## Manual Installation (bare-metal, no Docker)
+
+### 1. Install Node.js
 
 The recommended approach is [nvm](https://github.com/nvm-sh/nvm):
 
@@ -73,150 +202,23 @@ Save and exit (`Ctrl+O`, `Enter`, `Ctrl+X` in nano).
 npm start
 ```
 
-The server starts at `http://localhost:3000`. Open it in your browser, enter your admin password, and you're ready to create galleries.
+The server starts at `http://localhost:3000`.
 
----
+### Keep it running with PM2
 
-## Configuration
-
-All settings live in `.env`. Copy `.env.example` to get started — never commit `.env` to version control.
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `ADMIN_PASSWORD` | *(required)* | Password to access the admin dashboard |
-| `PORT` | `3000` | TCP port the server listens on |
-| `HOST` | `localhost` | Hostname shown in the startup log |
-| `MAX_UPLOAD_MB` | `200` | Max size per photo file, in MB |
-| `MAX_BACKGROUND_MB` | `20` | Max size for background images, in MB |
-
----
-
-## Usage
-
-1. **Open the Dashboard** — go to `http://localhost:3000`
-2. **Log in** — enter your admin password
-3. **Enter an Event Name** — e.g. "Johnson Wedding" or "Senior Photos — Sarah"
-4. **Upload Photos** — drag and drop files or entire folders onto the upload zone
-5. **Add a Background** *(optional)* — click "Choose Background" to upload a hero image shown on the client page
-6. **Create Gallery** — click "Create Gallery & Get Link"
-7. **Share** — copy the generated link and send it to your client
-
-### What your client sees
-
-When your client opens the link they see:
-- Your custom background image (if uploaded)
-- The event name as the page title
-- A single "Download All" button
-- Their photos arrive as one ZIP file
-
----
-
-## Deployment
-
-### Option 1: Keep it running with PM2
-
-For a VPS or home server — PM2 keeps the process alive across reboots.
+PM2 keeps the process alive across reboots:
 
 ```bash
-# Install PM2 globally
 npm install -g pm2
-
-# Start MeTransfer
 pm2 start server.js --name metransfer
-
-# Save the process list so it restarts on reboot
 pm2 save
-
-# Register PM2 to start on system boot (follow the printed command)
-pm2 startup
+pm2 startup   # follow the printed command
 ```
 
 To check logs:
 
 ```bash
 pm2 logs metransfer
-```
-
-### Option 2: Nginx reverse proxy + free SSL
-
-Install Nginx and Certbot:
-
-```bash
-sudo apt install -y nginx certbot python3-certbot-nginx
-```
-
-Create a site config:
-
-```bash
-sudo nano /etc/nginx/sites-available/metransfer
-```
-
-Paste:
-
-```nginx
-server {
-    listen 80;
-    server_name photos.yourdomain.com;
-
-    location / {
-        proxy_pass http://localhost:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_cache_bypass $http_upgrade;
-
-        # Required for large photo uploads
-        client_max_body_size 500M;
-    }
-}
-```
-
-Enable and reload:
-
-```bash
-sudo ln -s /etc/nginx/sites-available/metransfer /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
-```
-
-Get a free SSL certificate:
-
-```bash
-sudo certbot --nginx -d photos.yourdomain.com
-```
-
-Certbot will automatically renew the certificate. MeTransfer is now accessible at `https://photos.yourdomain.com`.
-
-### Option 3: Docker
-
-Create a `Dockerfile` in the project root:
-
-```dockerfile
-FROM node:20-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm install --production
-COPY . .
-EXPOSE 3000
-CMD ["npm", "start"]
-```
-
-Build and run:
-
-```bash
-# Build the image
-docker build -t metransfer .
-
-# Run — mount uploads and backgrounds so data persists across container restarts
-docker run -d \
-  --name metransfer \
-  --env-file .env \
-  -p 3000:3000 \
-  -v $(pwd)/uploads:/app/uploads \
-  -v $(pwd)/backgrounds:/app/backgrounds \
-  metransfer
 ```
 
 ---
@@ -227,16 +229,20 @@ docker run -d \
 metransfer/
 ├── server.js           # Express server — all routes and middleware
 ├── package.json        # Dependencies
+├── Dockerfile
+├── docker-compose.yml
 ├── .env                # Your config (gitignored — never committed)
 ├── .env.example        # Template for new installs
 ├── public/
 │   ├── admin.html      # Photographer dashboard
 │   └── customer.html   # Client download page
-├── uploads/            # Gallery photos, organised by gallery ID (gitignored)
-└── backgrounds/        # Background images, one per gallery (gitignored)
+└── data/               # Runtime data (Docker volume mount)
+    ├── uploads/        # Gallery photos, organised by gallery ID
+    ├── backgrounds/    # Background images, one per gallery
+    └── galleries.json  # Gallery metadata
 ```
 
-`uploads/`, `backgrounds/`, and `galleries.json` are created automatically on first run and are all gitignored — they contain user data, not source code.
+`data/`, `uploads/`, `backgrounds/`, and `galleries.json` are gitignored — they contain user data, not source code.
 
 ---
 

@@ -19,11 +19,14 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const MAX_PHOTO_BYTES = parseInt(process.env.MAX_UPLOAD_MB || '200') * 1024 * 1024;
 const MAX_BACKGROUND_BYTES = parseInt(process.env.MAX_BACKGROUND_MB || '20') * 1024 * 1024;
 
+// Data directory — set DATA_DIR in .env to decouple app code from runtime data (e.g. Docker volumes)
+const DATA_DIR = process.env.DATA_DIR || __dirname;
+
 // Data store for galleries (in production, use a database)
 const galleries = new Map();
 
 // File to persist gallery metadata
-const GALLERIES_FILE = path.join(__dirname, 'galleries.json');
+const GALLERIES_FILE = path.join(DATA_DIR, 'galleries.json');
 
 // Load galleries from file on startup
 function loadGalleries() {
@@ -46,13 +49,15 @@ function saveGalleries() {
 loadGalleries();
 
 // Ensure directories exist
-const dirs = ['uploads', 'backgrounds', 'public'];
-dirs.forEach(dir => {
-    const dirPath = path.join(__dirname, dir);
+['uploads', 'backgrounds'].forEach(dir => {
+    const dirPath = path.join(DATA_DIR, dir);
     if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath, { recursive: true });
     }
 });
+if (!fs.existsSync(path.join(__dirname, 'public'))) {
+    fs.mkdirSync(path.join(__dirname, 'public'), { recursive: true });
+}
 
 // Configure multer for file uploads
 let currentGalleryId = null;
@@ -61,7 +66,7 @@ const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         // Use the galleryId set before multer runs, or from params for adding to existing
         const galleryId = req.galleryId || req.params.galleryId;
-        const uploadPath = path.join(__dirname, 'uploads', galleryId);
+        const uploadPath = path.join(DATA_DIR, 'uploads', galleryId);
         
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
@@ -78,7 +83,7 @@ const storage = multer.diskStorage({
 
 const backgroundStorage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, 'backgrounds'));
+        cb(null, path.join(DATA_DIR, 'backgrounds'));
     },
     filename: (req, file, cb) => {
         const galleryId = req.params.galleryId;
@@ -257,7 +262,7 @@ app.get('/download/:galleryId', validateGalleryId, (req, res) => {
     const gallery = galleries.get(galleryId);
     
     // Check if gallery folder exists even if not in memory (for persistence)
-    const galleryPath = path.join(__dirname, 'uploads', galleryId);
+    const galleryPath = path.join(DATA_DIR, 'uploads', galleryId);
     if (!fs.existsSync(galleryPath)) {
         return res.status(404).send('Gallery not found');
     }
@@ -270,7 +275,7 @@ app.get('/api/gallery/:galleryId/info', validateGalleryId, (req, res) => {
     const { galleryId } = req.params;
     
     // Check backgrounds directory for this gallery
-    const backgroundsDir = path.join(__dirname, 'backgrounds');
+    const backgroundsDir = path.join(DATA_DIR, 'backgrounds');
     let backgroundFile = null;
     
     if (fs.existsSync(backgroundsDir)) {
@@ -279,7 +284,7 @@ app.get('/api/gallery/:galleryId/info', validateGalleryId, (req, res) => {
     }
     
     // Count files in gallery
-    const galleryPath = path.join(__dirname, 'uploads', galleryId);
+    const galleryPath = path.join(DATA_DIR, 'uploads', galleryId);
     let fileCount = 0;
     
     if (fs.existsSync(galleryPath)) {
@@ -301,7 +306,7 @@ app.get('/api/gallery/:galleryId/info', validateGalleryId, (req, res) => {
 // Serve background image
 app.get('/api/background/:galleryId', validateGalleryId, (req, res) => {
     const { galleryId } = req.params;
-    const backgroundsDir = path.join(__dirname, 'backgrounds');
+    const backgroundsDir = path.join(DATA_DIR, 'backgrounds');
     
     if (fs.existsSync(backgroundsDir)) {
         const files = fs.readdirSync(backgroundsDir);
@@ -318,7 +323,7 @@ app.get('/api/background/:galleryId', validateGalleryId, (req, res) => {
 // Download all photos as ZIP
 app.get('/api/gallery/:galleryId/download', validateGalleryId, (req, res) => {
     const { galleryId } = req.params;
-    const galleryPath = path.join(__dirname, 'uploads', galleryId);
+    const galleryPath = path.join(DATA_DIR, 'uploads', galleryId);
     
     if (!fs.existsSync(galleryPath)) {
         return res.status(404).json({ error: 'Gallery not found' });
@@ -363,7 +368,7 @@ app.get('/api/gallery/:galleryId/download', validateGalleryId, (req, res) => {
 app.get('/api/galleries', requireAuth, (req, res) => {
     const galleryList = [];
     const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const uploadsDir = path.join(__dirname, 'uploads');
+    const uploadsDir = path.join(DATA_DIR, 'uploads');
     
     // Scan the uploads directory for all gallery folders
     if (fs.existsSync(uploadsDir)) {
@@ -412,7 +417,7 @@ app.get('/api/galleries', requireAuth, (req, res) => {
 // Delete gallery
 app.delete('/api/gallery/:galleryId', requireAuth, validateGalleryId, (req, res) => {
     const { galleryId } = req.params;
-    const galleryPath = path.join(__dirname, 'uploads', galleryId);
+    const galleryPath = path.join(DATA_DIR, 'uploads', galleryId);
     
     // Delete gallery files
     if (fs.existsSync(galleryPath)) {
@@ -420,7 +425,7 @@ app.delete('/api/gallery/:galleryId', requireAuth, validateGalleryId, (req, res)
     }
     
     // Delete background
-    const backgroundsDir = path.join(__dirname, 'backgrounds');
+    const backgroundsDir = path.join(DATA_DIR, 'backgrounds');
     if (fs.existsSync(backgroundsDir)) {
         const files = fs.readdirSync(backgroundsDir);
         const backgroundFile = files.find(f => f.startsWith(galleryId));

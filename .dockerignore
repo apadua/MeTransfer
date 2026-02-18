@@ -1,0 +1,8 @@
+node_modules
+.env
+uploads/
+backgrounds/
+galleries.json
+data/
+.git
+.DS_Store

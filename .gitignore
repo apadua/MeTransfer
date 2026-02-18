@@ -4,11 +4,12 @@
 # Dependencies
 node_modules/
 
-# Uploaded content (user data, not source code)
+# Runtime data directory (Docker volume mount)
+data/
+
+# Bare-metal runtime data (no DATA_DIR set)
 uploads/
 backgrounds/
-
-# Runtime data
 galleries.json
 
 # macOS

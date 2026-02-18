@@ -34,18 +34,22 @@ There is no public registration. The entire admin side is protected by a single 
 MeTransfer/
 ├── server.js           # All server logic — Express app, routes, middleware
 ├── package.json        # Dependencies and npm scripts
+├── Dockerfile          # Docker image definition
+├── docker-compose.yml  # Docker Compose service definition (recommended deployment)
 ├── .env                # Secret config (gitignored) — copy from .env.example
 ├── .env.example        # Template showing required env vars
-├── .gitignore          # Excludes .env, node_modules, uploads/, backgrounds/, galleries.json
+├── .dockerignore       # Excludes node_modules, .env, data/ from Docker build context
+├── .gitignore          # Excludes .env, node_modules, data/, galleries.json
 ├── public/
 │   ├── admin.html      # Photographer dashboard (login, upload, gallery management)
 │   └── customer.html   # Client download page (background image + single download button)
-├── uploads/            # Runtime — gallery photos, organised as uploads/{galleryId}/
-├── backgrounds/        # Runtime — background images, named {galleryId}.{ext}
-└── galleries.json      # Runtime — gallery metadata persisted to disk
+└── data/               # Runtime data root (Docker volume mount at /data)
+    ├── uploads/        # Gallery photos, organised as uploads/{galleryId}/
+    ├── backgrounds/    # Background images, named {galleryId}.{ext}
+    └── galleries.json  # Gallery metadata persisted to disk
 ```
 
-`uploads/`, `backgrounds/`, and `galleries.json` are all generated at runtime and gitignored. `server.js` creates the directories automatically on startup if they do not exist.
+`data/`, `uploads/`, `backgrounds/`, and `galleries.json` are all generated at runtime and gitignored. `server.js` creates the directories automatically on startup if they do not exist.
 
 ---
 
@@ -60,8 +64,11 @@ All secrets and tuneable values live in `.env`. Copy `.env.example` to `.env` an
 | `HOST` | `localhost` | Hostname used only in startup log output |
 | `MAX_UPLOAD_MB` | `200` | Per-file size limit for photo uploads, in MB |
 | `MAX_BACKGROUND_MB` | `20` | Size limit for background image uploads, in MB |
+| `DATA_DIR` | `__dirname` (project root) | Root directory for uploads, backgrounds, and galleries.json. Set to `/data` in Docker; omit for bare-metal installs. |
 
 `dotenv` is loaded as the very first line of `server.js` so env vars are available everywhere.
+
+In Docker Compose, `DATA_DIR=/data` is set via the `environment` key and the `./data` host directory is mounted at `/data`. `ADMIN_PASSWORD` and other vars come from the `.env` file via `env_file`. This keeps all runtime data in one bind-mount volume that survives container upgrades.
 
 ---
 
@@ -163,6 +170,7 @@ Minimal, design-forward page. No authentication required.
 - **No build step.** Do not introduce a bundler, TypeScript, or a frontend framework without discussing it first. The simplicity is intentional.
 - **No external database.** Gallery metadata lives in `galleries.json`. If you need a database, that is a significant architectural change.
 - **multer file size limits are configurable via `.env`.** `MAX_UPLOAD_MB` (default 200) applies to photos; `MAX_BACKGROUND_MB` (default 20) applies to background images. Nginx `client_max_body_size` must still be set high enough to match (see README).
+- **DATA_DIR decouples code from data.** All filesystem paths for uploads, backgrounds, and galleries.json use `DATA_DIR` (defaulting to `__dirname`). In Docker this is set to `/data` via the `environment` key in docker-compose.yml; bare-metal installs work unchanged with no value set.
 - **Backgrounds replace on upload.** Uploading a new background for a gallery deletes the old file from disk.
 - **Galleries can be re-discovered from disk.** Do not assume the in-memory Map is the source of truth for what galleries exist; the filesystem is authoritative.
 - **Password in sessionStorage.** The admin password is stored in `sessionStorage` (cleared when the tab closes), not `localStorage`. This is intentional — it limits exposure on shared computers.
