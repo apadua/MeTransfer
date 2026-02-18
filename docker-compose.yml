@@ -4,9 +4,10 @@ services:
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
-    env_file:
-      - .env
     environment:
-      - INSTALL_DIR=/data # Needed for Container deployment. Do not change this value.
+      - INSTALL_DIR=/data # Needed for container deployment. Do not change this value.
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - MAX_UPLOAD_MB=${MAX_UPLOAD_MB:-200}
+      - MAX_BACKGROUND_MB=${MAX_BACKGROUND_MB:-20}
     volumes:
-      - ${GALLERY_DIR:-./data}:/data # Change this to your desired directory for storing the gallery data. Do not change the left side of the mapping.
+      - ${GALLERY_DIR:-./data}:/data # Set GALLERY_DIR in .env to change where data is stored on the host.
