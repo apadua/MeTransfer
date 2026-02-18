@@ -933,15 +933,21 @@
 
         async function handlePhotoDrop(e) {
             const items = e.dataTransfer.items;
-            const files = [];
-            
+
+            // Collect all FileSystemEntry objects synchronously while the drop event is still active.
+            // DataTransferItemList is cleared by the browser after any await, so entries must be
+            // captured before any async work begins.
+            const entries = [];
             for (let i = 0; i < items.length; i++) {
-                const item = items[i].webkitGetAsEntry();
-                if (item) {
-                    await traverseFileTree(item, files);
-                }
+                const entry = items[i].webkitGetAsEntry();
+                if (entry) entries.push(entry);
             }
-            
+
+            const files = [];
+            for (const entry of entries) {
+                await traverseFileTree(entry, files);
+            }
+
             addFiles(files);
         }
 
@@ -1081,7 +1087,8 @@
                         if (xhr.status === 200) {
                             resolve(JSON.parse(xhr.responseText));
                         } else {
-                            reject(new Error('Upload failed'));
+                            const body = JSON.parse(xhr.responseText || '{}');
+                            reject(new Error(body.error || 'Upload failed'));
                         }
                     };
                     xhr.onerror = () => reject(new Error('Upload failed'));

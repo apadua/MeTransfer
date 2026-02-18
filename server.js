@@ -221,7 +221,15 @@ app.post('/api/gallery/create', requireAuth, generateGalleryId, upload.array('ph
     const galleryId = req.galleryId;
     const gallery = galleries.get(galleryId);
 
-    if (gallery && req.files) {
+    // If multer processed no files, clean up the skeleton gallery and return an error
+    // so the admin never receives a link for an empty gallery that would 404
+    if (!req.files || req.files.length === 0) {
+        galleries.delete(galleryId);
+        saveGalleries();
+        return res.status(400).json({ error: 'No photos were uploaded. Please select at least one image.' });
+    }
+
+    if (gallery) {
         gallery.files = req.files.map(f => f.filename);
         gallery.eventName = req.body.eventName || 'Untitled Event';
         saveGalleries();
@@ -235,7 +243,7 @@ app.post('/api/gallery/create', requireAuth, generateGalleryId, upload.array('ph
         success: true,
         galleryId,
         downloadUrl,
-        fileCount: req.files ? req.files.length : 0
+        fileCount: req.files.length
     });
 });
 
