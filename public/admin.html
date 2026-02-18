@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Portal — Photographer Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg-primary: #0d0d0d;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #252525;
+            --text-primary: #f5f5f5;
+            --text-secondary: #a0a0a0;
+            --accent: #c9a87c;
+            --accent-hover: #dfc39e;
+            --success: #4a9c6d;
+            --danger: #c45c5c;
+            --border: #333;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 24px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding-top: 40px;
+        }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 3.5rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            font-size: 0.85rem;
+            letter-spacing: 0.25em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+        }
+
+        .section {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            padding: 40px;
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.5rem;
+            font-weight: 400;
+            letter-spacing: 0.1em;
+            margin-bottom: 24px;
+            color: var(--accent);
+        }
+
+        /* Login Screen */
+        .login-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .login-screen.hidden {
+            display: none;
+        }
+
+        .login-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 48px;
+            border-radius: 2px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-box h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 2rem;
+            font-weight: 300;
+            letter-spacing: 0.1em;
+            margin-bottom: 8px;
+        }
+
+        .login-box p {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin-bottom: 32px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            color: var(--text-primary);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            margin-bottom: 16px;
+            text-align: center;
+            letter-spacing: 0.1em;
+        }
+
+        .login-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        .login-error {
+            color: var(--danger);
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .login-error.active {
+            display: block;
+        }
+
+        .main-content {
+            display: none;
+        }
+
+        .main-content.visible {
+            display: block;
+        }
+
+        /* Form Fields */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            color: var(--text-primary);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.95rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        /* Drop Zone */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 2px;
+            padding: 80px 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--bg-tertiary);
+            position: relative;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.drag-over {
+            border-color: var(--accent);
+            background: rgba(201, 168, 124, 0.05);
+        }
+
+        .drop-zone.drag-over {
+            transform: scale(1.01);
+        }
+
+        .drop-zone-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 24px;
+            opacity: 0.6;
+        }
+
+        .drop-zone-icon svg {
+            width: 100%;
+            height: 100%;
+            stroke: var(--accent);
+        }
+
+        .drop-zone h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.75rem;
+            font-weight: 400;
+            margin-bottom: 12px;
+        }
+
+        .drop-zone p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .drop-zone input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Upload Progress */
+        .upload-progress {
+            display: none;
+            margin-top: 32px;
+        }
+
+        .upload-progress.active {
+            display: block;
+        }
+
+        .progress-bar-container {
+            background: var(--bg-tertiary);
+            height: 4px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--accent);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+
+        /* File List */
+        .file-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 24px;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            display: none;
+        }
+
+        .file-list.active {
+            display: block;
+        }
+
+        .file-list-header {
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+        }
+
+        .file-item:last-child {
+            border-bottom: none;
+        }
+
+        .file-item-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 12px;
+            opacity: 0.6;
+        }
+
+        .file-item-name {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .file-item-size {
+            color: var(--text-secondary);
+            margin-left: 12px;
+        }
+
+        /* Background Upload */
+        .background-section {
+            margin-top: 32px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+        }
+
+        .background-preview {
+            display: none;
+            margin-top: 16px;
+            position: relative;
+        }
+
+        .background-preview.active {
+            display: block;
+        }
+
+        .background-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 2px;
+            object-fit: cover;
+        }
+
+        .background-preview .remove-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 32px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--accent-hover);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            opacity: 0.9;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 16px;
+            margin-top: 32px;
+            flex-wrap: wrap;
+        }
+
+        /* Result Panel */
+        .result-panel {
+            display: none;
+            margin-top: 32px;
+            padding: 32px;
+            background: rgba(74, 156, 109, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 2px;
+        }
+
+        .result-panel.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-title {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.25rem;
+            color: var(--success);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .result-title svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .url-container {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .url-input {
+            flex: 1;
+            padding: 14px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 2px;
+            color: var(--text-primary);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+        }
+
+        .copy-btn {
+            padding: 14px 24px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 2px;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            opacity: 0.9;
+        }
+
+        .copy-btn.copied {
+            background: var(--accent);
+        }
+
+        /* Galleries List */
+        .galleries-list {
+            margin-top: 24px;
+        }
+
+        .gallery-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border-radius: 2px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .gallery-item:hover {
+            background: rgba(201, 168, 124, 0.05);
+        }
+
+        .gallery-info {
+            flex: 1;
+        }
+
+        .gallery-event-name {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.25rem;
+            font-weight: 400;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .gallery-meta {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .gallery-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .gallery-actions button {
+            padding: 8px 16px;
+            font-size: 0.75rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px;
+            color: var(--text-secondary);
+        }
+
+        /* Logout Button */
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            font-size: 0.7rem;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+        }
+
+        .logout-btn:hover {
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .section {
+                padding: 24px;
+            }
+
+            .drop-zone {
+                padding: 48px 24px;
+            }
+
+            .url-container {
+                flex-direction: column;
+            }
+
+            .gallery-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .gallery-actions {
+                width: 100%;
+            }
+
+            .gallery-actions button {
+                flex: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-screen" id="loginScreen">
+        <div class="login-box">
+            <h2>Photo Portal</h2>
+            <p>Enter admin password to continue</p>
+            <input type="password" id="passwordInput" placeholder="Password" autocomplete="off">
+            <p class="login-error" id="loginError">Invalid password. Please try again.</p>
+            <button class="btn btn-primary" id="loginBtn" style="width: 100%;">Enter</button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <button class="btn logout-btn" id="logoutBtn">Logout</button>
+        
+        <div class="container">
+            <header>
+                <h1>Photo Portal</h1>
+                <p class="subtitle">Photographer Dashboard</p>
+            </header>
+
+            <section class="section">
+                <h2 class="section-title">Create New Gallery</h2>
+                
+                <div class="form-group">
+                    <label for="eventName">Event Name</label>
+                    <input type="text" id="eventName" placeholder="e.g., Johnson Wedding, Senior Photos - Sarah">
+                </div>
+                
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-zone-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                    </div>
+                    <h3>Drop Photos Here</h3>
+                    <p>or click to browse • supports folders</p>
+                    <input type="file" id="fileInput" multiple accept="image/*" webkitdirectory directory>
+                </div>
+
+                <div class="file-list" id="fileList">
+                    <div class="file-list-header" id="fileListHeader"></div>
+                </div>
+
+                <div class="upload-progress" id="uploadProgress">
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                    <p class="progress-text" id="progressText">Uploading...</p>
+                </div>
+
+                <div class="background-section">
+                    <h3 class="section-title" style="font-size: 1.1rem; margin-bottom: 16px;">Customer Background (Optional)</h3>
+                    <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 16px;">
+                        Upload a photo to display as the background on your customer's download page.
+                    </p>
+                    <label class="btn btn-secondary" style="display: inline-flex;">
+                        <span>Choose Background</span>
+                        <input type="file" id="backgroundInput" accept="image/jpeg,image/png,image/gif,image/webp" style="display: none;">
+                    </label>
+                    <div class="background-preview" id="backgroundPreview">
+                        <img id="backgroundImg" src="" alt="Background preview">
+                        <button class="remove-btn" id="removeBackground">×</button>
+                    </div>
+                </div>
+
+                <div class="action-bar">
+                    <button class="btn btn-primary" id="createGalleryBtn" disabled>Create Gallery & Get Link</button>
+                    <button class="btn btn-secondary" id="clearBtn">Clear All</button>
+                </div>
+
+                <div class="result-panel" id="resultPanel">
+                    <h3 class="result-title">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Gallery Created Successfully
+                    </h3>
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                        Share this link with your customer:
+                    </p>
+                    <div class="url-container">
+                        <input type="text" class="url-input" id="galleryUrl" readonly>
+                        <button class="copy-btn" id="copyBtn">Copy</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section">
+                <h2 class="section-title">Your Galleries</h2>
+                <div class="galleries-list" id="galleriesList">
+                    <div class="empty-state">Loading galleries...</div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let selectedFiles = [];
+        let backgroundFile = null;
+        let adminPassword = '';
+
+        // Elements
+        const loginScreen = document.getElementById('loginScreen');
+        const mainContent = document.getElementById('mainContent');
+        const passwordInput = document.getElementById('passwordInput');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const eventNameInput = document.getElementById('eventName');
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const fileListHeader = document.getElementById('fileListHeader');
+        const backgroundInput = document.getElementById('backgroundInput');
+        const backgroundPreview = document.getElementById('backgroundPreview');
+        const backgroundImg = document.getElementById('backgroundImg');
+        const removeBackground = document.getElementById('removeBackground');
+        const createGalleryBtn = document.getElementById('createGalleryBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const resultPanel = document.getElementById('resultPanel');
+        const galleryUrl = document.getElementById('galleryUrl');
+        const copyBtn = document.getElementById('copyBtn');
+        const galleriesList = document.getElementById('galleriesList');
+
+        // Check for saved session
+        const savedPassword = sessionStorage.getItem('adminPassword');
+        if (savedPassword) {
+            adminPassword = savedPassword;
+            showMainContent();
+        }
+
+        // Login handling
+        loginBtn.addEventListener('click', attemptLogin);
+        passwordInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') attemptLogin();
+        });
+
+        async function attemptLogin() {
+            const password = passwordInput.value;
+            
+            try {
+                const response = await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password })
+                });
+                
+                if (response.ok) {
+                    adminPassword = password;
+                    sessionStorage.setItem('adminPassword', password);
+                    showMainContent();
+                } else {
+                    loginError.classList.add('active');
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                }
+            } catch (err) {
+                loginError.classList.add('active');
+            }
+        }
+
+        function showMainContent() {
+            loginScreen.classList.add('hidden');
+            mainContent.classList.add('visible');
+            loadGalleries();
+        }
+
+        logoutBtn.addEventListener('click', () => {
+            adminPassword = '';
+            sessionStorage.removeItem('adminPassword');
+            loginScreen.classList.remove('hidden');
+            mainContent.classList.remove('visible');
+            passwordInput.value = '';
+            loginError.classList.remove('active');
+        });
+
+        // Helper to add auth header
+        function authHeaders() {
+            return { 'X-Admin-Password': adminPassword };
+        }
+
+        // Drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(event => {
+            dropZone.addEventListener(event, e => {
+                e.preventDefault();
+                e.stopPropagation();
+            });
+        });
+
+        ['dragenter', 'dragover'].forEach(event => {
+            dropZone.addEventListener(event, () => dropZone.classList.add('drag-over'));
+        });
+
+        ['dragleave', 'drop'].forEach(event => {
+            dropZone.addEventListener(event, () => dropZone.classList.remove('drag-over'));
+        });
+
+        dropZone.addEventListener('drop', e => {
+            const items = e.dataTransfer.items;
+            handleItems(items);
+        });
+
+        fileInput.addEventListener('change', e => {
+            const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
+            addFiles(files);
+        });
+
+        async function handleItems(items) {
+            const files = [];
+            
+            async function traverseEntry(entry, path = '') {
+                return new Promise((resolve) => {
+                    if (entry.isFile) {
+                        entry.file(file => {
+                            if (file.type.startsWith('image/')) {
+                                files.push(file);
+                            }
+                            resolve();
+                        });
+                    } else if (entry.isDirectory) {
+                        const reader = entry.createReader();
+                        reader.readEntries(async entries => {
+                            for (const e of entries) {
+                                await traverseEntry(e, path + entry.name + '/');
+                            }
+                            resolve();
+                        });
+                    } else {
+                        resolve();
+                    }
+                });
+            }
+
+            const entries = [];
+            for (let i = 0; i < items.length; i++) {
+                const entry = items[i].webkitGetAsEntry();
+                if (entry) entries.push(entry);
+            }
+
+            for (const entry of entries) {
+                await traverseEntry(entry);
+            }
+
+            addFiles(files);
+        }
+
+        function addFiles(files) {
+            selectedFiles = [...selectedFiles, ...files];
+            updateFileList();
+            updateCreateButton();
+        }
+
+        function formatSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        function updateFileList() {
+            if (selectedFiles.length === 0) {
+                fileList.classList.remove('active');
+                return;
+            }
+
+            fileList.classList.add('active');
+            fileListHeader.textContent = `${selectedFiles.length} photo${selectedFiles.length === 1 ? '' : 's'} selected`;
+            
+            const itemsHtml = selectedFiles.map(file => `
+                <div class="file-item">
+                    <svg class="file-item-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+                    </svg>
+                    <span class="file-item-name">${file.name}</span>
+                    <span class="file-item-size">${formatSize(file.size)}</span>
+                </div>
+            `).join('');
+            
+            fileList.innerHTML = `<div class="file-list-header">${selectedFiles.length} photo${selectedFiles.length === 1 ? '' : 's'} selected</div>` + itemsHtml;
+        }
+
+        function updateCreateButton() {
+            createGalleryBtn.disabled = selectedFiles.length === 0;
+        }
+
+        // Background handling
+        backgroundInput.addEventListener('change', e => {
+            const file = e.target.files[0];
+            if (file) {
+                backgroundFile = file;
+                const reader = new FileReader();
+                reader.onload = e => {
+                    backgroundImg.src = e.target.result;
+                    backgroundPreview.classList.add('active');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        removeBackground.addEventListener('click', () => {
+            backgroundFile = null;
+            backgroundInput.value = '';
+            backgroundPreview.classList.remove('active');
+        });
+
+        // Clear all
+        clearBtn.addEventListener('click', () => {
+            selectedFiles = [];
+            backgroundFile = null;
+            fileInput.value = '';
+            backgroundInput.value = '';
+            eventNameInput.value = '';
+            fileList.classList.remove('active');
+            backgroundPreview.classList.remove('active');
+            resultPanel.classList.remove('active');
+            updateCreateButton();
+        });
+
+        // Create gallery
+        createGalleryBtn.addEventListener('click', async () => {
+            if (selectedFiles.length === 0) return;
+
+            createGalleryBtn.disabled = true;
+            uploadProgress.classList.add('active');
+            resultPanel.classList.remove('active');
+
+            try {
+                // Create FormData with photos
+                const formData = new FormData();
+                formData.append('eventName', eventNameInput.value || 'Untitled Event');
+                selectedFiles.forEach(file => {
+                    formData.append('photos', file);
+                });
+
+                // Upload photos
+                progressText.textContent = 'Uploading photos...';
+                progressBar.style.width = '0%';
+
+                const response = await fetch('/api/gallery/create', {
+                    method: 'POST',
+                    headers: authHeaders(),
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error('Upload failed');
+
+                const result = await response.json();
+                progressBar.style.width = '80%';
+
+                // Upload background if selected
+                if (backgroundFile) {
+                    progressText.textContent = 'Uploading background...';
+                    
+                    const bgFormData = new FormData();
+                    bgFormData.append('background', backgroundFile);
+
+                    await fetch(`/api/gallery/${result.galleryId}/background`, {
+                        method: 'POST',
+                        headers: authHeaders(),
+                        body: bgFormData
+                    });
+                }
+
+                progressBar.style.width = '100%';
+                progressText.textContent = 'Complete!';
+
+                // Show result
+                setTimeout(() => {
+                    uploadProgress.classList.remove('active');
+                    resultPanel.classList.add('active');
+                    galleryUrl.value = result.downloadUrl;
+                    
+                    // Clear form for next upload
+                    selectedFiles = [];
+                    backgroundFile = null;
+                    fileInput.value = '';
+                    backgroundInput.value = '';
+                    eventNameInput.value = '';
+                    fileList.classList.remove('active');
+                    backgroundPreview.classList.remove('active');
+                    updateCreateButton();
+                    
+                    loadGalleries();
+                }, 500);
+
+            } catch (error) {
+                console.error(error);
+                progressText.textContent = 'Upload failed. Please try again.';
+                progressBar.style.width = '0%';
+            }
+
+            createGalleryBtn.disabled = false;
+        });
+
+        // Copy URL
+        copyBtn.addEventListener('click', () => {
+            galleryUrl.select();
+            document.execCommand('copy');
+            copyBtn.textContent = 'Copied!';
+            copyBtn.classList.add('copied');
+            setTimeout(() => {
+                copyBtn.textContent = 'Copy';
+                copyBtn.classList.remove('copied');
+            }, 2000);
+        });
+
+        // Format date nicely
+        function formatDateTime(dateStr) {
+            const date = new Date(dateStr);
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            };
+            return date.toLocaleString('en-US', options);
+        }
+
+        // Load galleries
+        async function loadGalleries() {
+            try {
+                const response = await fetch('/api/galleries', {
+                    headers: authHeaders()
+                });
+                
+                if (!response.ok) {
+                    if (response.status === 401) {
+                        // Session expired
+                        logoutBtn.click();
+                        return;
+                    }
+                    throw new Error('Failed to load galleries');
+                }
+                
+                const galleries = await response.json();
+
+                if (galleries.length === 0) {
+                    galleriesList.innerHTML = '<div class="empty-state">No galleries yet. Create your first one above!</div>';
+                    return;
+                }
+
+                galleriesList.innerHTML = galleries.map(gallery => `
+                    <div class="gallery-item" data-id="${gallery.id}">
+                        <div class="gallery-info">
+                            <div class="gallery-event-name">${escapeHtml(gallery.eventName)}</div>
+                            <div class="gallery-meta">
+                                Uploaded ${formatDateTime(gallery.created)}
+                            </div>
+                        </div>
+                        <div class="gallery-actions">
+                            <button class="btn btn-secondary copy-gallery-url" data-url="${gallery.downloadUrl}">Copy Link</button>
+                            <button class="btn btn-danger delete-gallery">Delete</button>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Add event listeners
+                document.querySelectorAll('.copy-gallery-url').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const url = btn.dataset.url;
+                        navigator.clipboard.writeText(url);
+                        btn.textContent = 'Copied!';
+                        setTimeout(() => btn.textContent = 'Copy Link', 2000);
+                    });
+                });
+
+                document.querySelectorAll('.delete-gallery').forEach(btn => {
+                    btn.addEventListener('click', async () => {
+                        const item = btn.closest('.gallery-item');
+                        const id = item.dataset.id;
+                        
+                        if (confirm('Delete this gallery? This cannot be undone.')) {
+                            await fetch(`/api/gallery/${id}`, { 
+                                method: 'DELETE',
+                                headers: authHeaders()
+                            });
+                            loadGalleries();
+                        }
+                    });
+                });
+
+            } catch (error) {
+                console.error(error);
+                galleriesList.innerHTML = '<div class="empty-state">Failed to load galleries</div>';
+            }
+        }
+
+        // Helper to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

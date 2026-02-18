@@ -1,0 +1,15 @@
+# Environment variables - never commit this
+.env
+
+# Dependencies
+node_modules/
+
+# Uploaded content (user data, not source code)
+uploads/
+backgrounds/
+
+# Runtime data
+galleries.json
+
+# macOS
+.DS_Store

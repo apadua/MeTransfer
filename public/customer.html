@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Photos Are Ready</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: #0a0a0a;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* Background Image */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+        }
+
+        .background.loaded {
+            opacity: 1;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                135deg,
+                rgba(0, 0, 0, 0.7) 0%,
+                rgba(0, 0, 0, 0.4) 50%,
+                rgba(0, 0, 0, 0.7) 100%
+            );
+            z-index: 1;
+        }
+
+        /* Content */
+        .content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 40px;
+            max-width: 600px;
+            animation: fadeInUp 1s ease forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 300;
+            letter-spacing: 0.2em;
+            margin-bottom: 16px;
+            text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 0.15em;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 48px;
+        }
+
+        /* Download Button */
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px 48px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            color: #fff;
+            text-decoration: none;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            font-weight: 400;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .download-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        .download-btn svg {
+            width: 24px;
+            height: 24px;
+            stroke: currentColor;
+        }
+
+        /* Loading State */
+        .download-btn.loading {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .download-btn.loading .btn-text {
+            display: none;
+        }
+
+        .download-btn.loading .loading-text {
+            display: inline;
+        }
+
+        .loading-text {
+            display: none;
+        }
+
+        /* File count */
+        .file-count {
+            margin-top: 24px;
+            font-size: 0.9rem;
+            letter-spacing: 0.1em;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Error state */
+        .error {
+            display: none;
+            color: #ff6b6b;
+            font-size: 1.1rem;
+            margin-top: 24px;
+        }
+
+        .error.active {
+            display: block;
+        }
+
+        /* Decorative elements */
+        .decorative-line {
+            width: 60px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 0 auto 32px;
+        }
+
+        /* Not found state */
+        .not-found {
+            display: none;
+        }
+
+        .not-found.active {
+            display: block;
+        }
+
+        .not-found h1 {
+            font-size: 2.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+                letter-spacing: 0.1em;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+
+            .download-btn {
+                padding: 18px 36px;
+                font-size: 1rem;
+            }
+
+            .content {
+                padding: 24px;
+            }
+        }
+
+        /* Success animation */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .download-btn.success {
+            animation: pulse 0.5s ease;
+            background: rgba(74, 156, 109, 0.3);
+            border-color: rgba(74, 156, 109, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="background" id="background"></div>
+    <div class="overlay"></div>
+
+    <div class="content" id="content">
+        <div class="decorative-line"></div>
+        <h1 id="eventTitle">Your Photos</h1>
+        <p class="subtitle">are ready for download</p>
+        
+        <a href="#" class="download-btn" id="downloadBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <span class="btn-text">Download All</span>
+            <span class="loading-text">Preparing...</span>
+        </a>
+
+        <p class="file-count" id="fileCount"></p>
+        <p class="error" id="error">Something went wrong. Please try again.</p>
+    </div>
+
+    <div class="content not-found" id="notFound">
+        <div class="decorative-line"></div>
+        <h1>Gallery Not Found</h1>
+        <p class="subtitle">This link may have expired or been removed</p>
+    </div>
+
+    <script>
+        // Get gallery ID from URL
+        const pathParts = window.location.pathname.split('/');
+        const galleryId = pathParts[pathParts.length - 1];
+
+        const background = document.getElementById('background');
+        const content = document.getElementById('content');
+        const notFound = document.getElementById('notFound');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const fileCount = document.getElementById('fileCount');
+        const error = document.getElementById('error');
+        const eventTitle = document.getElementById('eventTitle');
+
+        // Load gallery info
+        async function loadGallery() {
+            try {
+                const response = await fetch(`/api/gallery/${galleryId}/info`);
+                
+                if (!response.ok) {
+                    throw new Error('Gallery not found');
+                }
+
+                const info = await response.json();
+
+                // Set event name as title
+                if (info.eventName) {
+                    eventTitle.textContent = info.eventName;
+                    document.title = `${info.eventName} - Download`;
+                }
+
+                // Set background if available
+                if (info.background) {
+                    background.style.backgroundImage = `url(${info.background})`;
+                    background.classList.add('loaded');
+                }
+
+                // Show file count
+                if (info.fileCount > 0) {
+                    fileCount.textContent = `${info.fileCount} photo${info.fileCount === 1 ? '' : 's'}`;
+                }
+
+                // Set download link
+                downloadBtn.href = `/api/gallery/${galleryId}/download`;
+
+            } catch (err) {
+                console.error(err);
+                content.style.display = 'none';
+                notFound.classList.add('active');
+            }
+        }
+
+        // Handle download click
+        downloadBtn.addEventListener('click', function(e) {
+            // Don't prevent default - we want the download to happen
+            downloadBtn.classList.add('loading');
+            
+            // Reset after a moment
+            setTimeout(() => {
+                downloadBtn.classList.remove('loading');
+                downloadBtn.classList.add('success');
+                
+                setTimeout(() => {
+                    downloadBtn.classList.remove('success');
+                }, 1000);
+            }, 1500);
+        });
+
+        // Initialize
+        loadGallery();
+    </script>
+</body>
+</html>
