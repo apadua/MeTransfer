@@ -61,14 +61,13 @@ All secrets and tuneable values live in `.env`. Copy `.env.example` to `.env` an
 |----------|---------|-------|
 | `ADMIN_PASSWORD` | *(none — must be set)* | Password to access the admin dashboard |
 | `PORT` | `3000` | TCP port the server listens on |
-| `HOST` | `localhost` | Hostname used only in startup log output |
 | `MAX_UPLOAD_MB` | `200` | Per-file size limit for photo uploads, in MB |
 | `MAX_BACKGROUND_MB` | `20` | Size limit for background image uploads, in MB |
-| `DATA_DIR` | `__dirname` (project root) | Root directory for uploads, backgrounds, and galleries.json. Set to `/data` in Docker; omit for bare-metal installs. |
+| `GALLERY_DIR` | `./data` | **Docker only.** Host path mounted as `/data` in the container. Set to any writable path on the host (e.g. `/mnt/appdata/metransfer`). Used only by Docker Compose for volume substitution — never passed into the container. |
 
 `dotenv` is loaded as the very first line of `server.js` so env vars are available everywhere.
 
-In Docker Compose, `DATA_DIR=/data` is set via the `environment` key and the `./data` host directory is mounted at `/data`. `ADMIN_PASSWORD` and other vars come from the `.env` file via `env_file`. This keeps all runtime data in one bind-mount volume that survives container upgrades.
+In Docker Compose, `INSTALL_DIR=/data` is set via the `environment` key so Node.js always writes to `/data` inside the container. `GALLERY_DIR` in `.env` controls which host directory is bind-mounted there. The two variables have no naming collision: `GALLERY_DIR` never enters the container, `INSTALL_DIR` is never set by the user.
 
 ---
 
@@ -170,7 +169,7 @@ Minimal, design-forward page. No authentication required.
 - **No build step.** Do not introduce a bundler, TypeScript, or a frontend framework without discussing it first. The simplicity is intentional.
 - **No external database.** Gallery metadata lives in `galleries.json`. If you need a database, that is a significant architectural change.
 - **multer file size limits are configurable via `.env`.** `MAX_UPLOAD_MB` (default 200) applies to photos; `MAX_BACKGROUND_MB` (default 20) applies to background images. Nginx `client_max_body_size` must still be set high enough to match (see README).
-- **DATA_DIR decouples code from data.** All filesystem paths for uploads, backgrounds, and galleries.json use `DATA_DIR` (defaulting to `__dirname`). In Docker this is set to `/data` via the `environment` key in docker-compose.yml; bare-metal installs work unchanged with no value set.
+- **INSTALL_DIR decouples code from data.** All filesystem paths in `server.js` use `process.env.INSTALL_DIR || __dirname`. In Docker, `INSTALL_DIR=/data` is set via the `environment` key in docker-compose.yml. Bare-metal installs work unchanged with no value set. `GALLERY_DIR` in `.env` is a separate variable used only by Docker Compose for the host-side volume path — it never enters the container.
 - **Backgrounds replace on upload.** Uploading a new background for a gallery deletes the old file from disk.
 - **Galleries can be re-discovered from disk.** Do not assume the in-memory Map is the source of truth for what galleries exist; the filesystem is authoritative.
 - **Password in sessionStorage.** The admin password is stored in `sessionStorage` (cleared when the tab closes), not `localStorage`. This is intentional — it limits exposure on shared computers.

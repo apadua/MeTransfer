@@ -10,7 +10,9 @@ const rateLimit = require('express-rate-limit');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const HOST = process.env.HOST || 'localhost';
+
+// Trust X-Forwarded-Proto from reverse proxies so req.protocol is correct behind Nginx/SSL
+app.set('trust proxy', 1);
 
 // Admin password loaded from .env file
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -19,8 +21,10 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 const MAX_PHOTO_BYTES = parseInt(process.env.MAX_UPLOAD_MB || '200') * 1024 * 1024;
 const MAX_BACKGROUND_BYTES = parseInt(process.env.MAX_BACKGROUND_MB || '20') * 1024 * 1024;
 
-// Data directory — set DATA_DIR in .env to decouple app code from runtime data (e.g. Docker volumes)
-const DATA_DIR = process.env.DATA_DIR || __dirname;
+// Install directory — where Node.js stores uploads, backgrounds, and galleries.json
+// Docker: always /data (set via environment in docker-compose.yml)
+// Bare-metal: defaults to the project directory
+const DATA_DIR = process.env.INSTALL_DIR || __dirname;
 
 // Data store for galleries (in production, use a database)
 const galleries = new Map();
@@ -448,7 +452,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`\n📸 Photo Portal is running!\n`);
-    console.log(`   Admin Interface: http://${HOST}:${PORT}`);
-    console.log(`   Upload photos and share the generated link with your customers.\n`);
+    console.log(`\n📸 MeTransfer is running on port ${PORT}\n`);
 });

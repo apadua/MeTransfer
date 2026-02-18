@@ -59,10 +59,9 @@ All settings live in `.env`. Copy `.env.example` to get started — never commit
 |----------|---------|-------------|
 | `ADMIN_PASSWORD` | *(required)* | Password to access the admin dashboard |
 | `PORT` | `3000` | TCP port the server listens on |
-| `HOST` | `localhost` | Hostname shown in the startup log |
 | `MAX_UPLOAD_MB` | `200` | Max size per photo file, in MB |
 | `MAX_BACKGROUND_MB` | `20` | Max size for background images, in MB |
-| `DATA_DIR` | *(project root)* | Directory for uploads, backgrounds, and galleries.json. Set to `/data` in Docker deployments. |
+| `GALLERY_DIR` | `./data` | Host path mounted into the container as `/data`. Set to any writable path on your host (Docker only). |
 
 ---
 
@@ -116,6 +115,7 @@ server {
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
 
         # Required for large photo uploads

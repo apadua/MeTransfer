@@ -3,10 +3,10 @@ services:
     image: andrepadua/metransfer:latest
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "${PORT:-3000}:3000"
     env_file:
       - .env
     environment:
-      - DATA_DIR=/data
+      - INSTALL_DIR=/data # Needed for Container deployment. Do not change this value.
     volumes:
-      - ./data:/data
+      - ${GALLERY_DIR:-./data}:/data # Change this to your desired directory for storing the gallery data. Do not change the left side of the mapping.
