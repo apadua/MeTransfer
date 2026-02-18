@@ -1139,11 +1139,26 @@
             document.getElementById('uploadSection').style.display = 'block';
         }
 
+        // Works on both HTTP and HTTPS by falling back to execCommand when
+        // the Clipboard API is unavailable (requires a secure context).
+        function copyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                return navigator.clipboard.writeText(text);
+            }
+            // Fallback for plain HTTP
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;opacity:0;pointer-events:none';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+            return Promise.resolve();
+        }
+
         function copyLink(inputId) {
             const input = document.getElementById(inputId);
-            input.select();
-            navigator.clipboard.writeText(input.value);
-            
+            copyToClipboard(input.value);
             const btn = input.nextElementSibling;
             btn.textContent = 'Copied!';
             setTimeout(() => btn.textContent = 'Copy', 2000);
@@ -1288,7 +1303,7 @@
 
         function copyGalleryLink(id, type, btn) {
             const url = `${window.location.origin}/${type}/${id}`;
-            navigator.clipboard.writeText(url);
+            copyToClipboard(url);
             btn.textContent = 'Copied!';
             setTimeout(() => btn.textContent = 'Copy Link', 2000);
         }

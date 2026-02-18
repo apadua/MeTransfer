@@ -406,6 +406,8 @@ app.get('/api/gallery/:galleryId/photos', validateGalleryId, (req, res) => {
 
     const files = fs.readdirSync(galleryPath).filter(f => !f.startsWith('.'));
 
+    const gallery = galleries.get(galleryId);
+
     const photos = files.map(filename => ({
         filename,
         url:         `/api/gallery/${galleryId}/photo/${encodeURIComponent(filename)}`,
@@ -413,7 +415,12 @@ app.get('/api/gallery/:galleryId/photos', validateGalleryId, (req, res) => {
         downloadUrl: `/api/gallery/${galleryId}/download/${encodeURIComponent(filename)}`
     }));
 
-    res.json(photos);
+    // Return shape matches what preview.html expects: { id, eventName, photos: [...] }
+    res.json({
+        id: galleryId,
+        eventName: gallery ? gallery.eventName : 'Untitled Event',
+        photos
+    });
 });
 
 // Serve a single photo (original or thumbnail)
