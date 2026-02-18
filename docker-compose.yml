@@ -1,6 +1,6 @@
 services:
   metransfer:
-    build: .
+    image: andrepadua/metransfer:latest
     restart: unless-stopped
     ports:
       - "3000:3000"
