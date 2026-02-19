@@ -127,6 +127,16 @@ if (!fs.existsSync(path.join(__dirname, 'public'))) {
 
 // --- Helper functions ---
 
+// Find a custom logo stored in DATA_DIR (any extension). Returns null if none exists.
+function findLogoFile() {
+    const LOGO_EXTS = ['.svg', '.png', '.jpg', '.jpeg', '.gif', '.webp'];
+    for (const ext of LOGO_EXTS) {
+        const p = path.join(DATA_DIR, `logo${ext}`);
+        if (fs.existsSync(p)) return p;
+    }
+    return null;
+}
+
 // Escape a string for safe use in HTML attribute values (OG meta tag injection)
 function escapeAttr(str) {
     return String(str)
@@ -202,6 +212,21 @@ const uploadBackground = multer({
     }
 });
 
+// Logo uploads accept raster images and SVG; stored in memory then written to DATA_DIR
+const uploadLogo = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB cap — logos should be small
+    fileFilter: (req, file, cb) => {
+        const ext = path.extname(file.originalname).toLowerCase();
+        const allowed = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg'];
+        if (allowed.includes(ext)) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only JPEG, PNG, GIF, WebP, or SVG files are allowed for the logo'), false);
+        }
+    }
+});
+
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
@@ -267,6 +292,47 @@ app.post('/api/auth/verify', authLimiter, (req, res) => {
 // Admin interface - photographer uploads photos here
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Serve the logo — custom file in DATA_DIR takes precedence over the bundled logo.svg
+const LOGO_CONTENT_TYPES = {
+    '.svg':  'image/svg+xml',
+    '.png':  'image/png',
+    '.jpg':  'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.gif':  'image/gif',
+    '.webp': 'image/webp',
+};
+
+app.get('/api/logo', (_req, res) => {
+    const custom = findLogoFile();
+    if (custom) {
+        const ext = path.extname(custom).toLowerCase();
+        res.setHeader('Content-Type', LOGO_CONTENT_TYPES[ext] || 'application/octet-stream');
+        return res.sendFile(custom);
+    }
+    // Fall back to the bundled logo.svg in public/
+    res.sendFile(path.join(__dirname, 'public', 'logo.svg'));
+});
+
+// Replace the logo (admin only)
+app.post('/api/logo', requireAuth, uploadLogo.single('logo'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Delete any existing custom logo files
+    const LOGO_EXTS = ['.svg', '.png', '.jpg', '.jpeg', '.gif', '.webp'];
+    for (const ext of LOGO_EXTS) {
+        const p = path.join(DATA_DIR, `logo${ext}`);
+        if (fs.existsSync(p)) fs.unlinkSync(p);
+    }
+
+    const ext = path.extname(req.file.originalname).toLowerCase();
+    const dest = path.join(DATA_DIR, `logo${ext}`);
+    fs.writeFileSync(dest, req.file.buffer);
+
+    res.json({ success: true });
 });
 
 // Middleware to generate galleryId BEFORE multer processes files

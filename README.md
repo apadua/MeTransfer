@@ -1,14 +1,15 @@
 # MeTransfer
 
-A self-hosted photo delivery platform for photographers. Upload photos, share a branded download link with your client — they get one button and a ZIP.
+A self-hosted photo delivery platform for photographers. Upload photos, share a branded download link with your client — they get a beautiful gallery preview and a one-click ZIP download.
 
 ## Features
 
 - **Drag & Drop Upload** — drop individual files or entire folders from your computer
-- **Custom Backgrounds** — upload a hero image for each client's download page
-- **Clean Client Experience** — minimalist, elegant download page with no distractions
-- **ZIP Downloads** — photos automatically packaged into a single download
-- **Gallery Management** — view, copy links, and delete galleries from the dashboard
+- **Custom Backgrounds** — upload a hero image per gallery; stored as normalised JPEG
+- **Photo Preview Page** — thumbnail grid with full-screen lightbox, keyboard/touch navigation, and individual photo download
+- **ZIP Downloads** — all photos packaged into a single named download
+- **Gallery Management** — rename galleries inline, set cover images, copy links, delete from the dashboard
+- **Social Media Previews** — auto-generated OG images (1200×630) injected into share links
 - **No Database Required** — file-based storage, simple to deploy and back up
 
 ---
@@ -29,13 +30,20 @@ mkdir metransfer && cd metransfer
 cat > .env <<'EOF'
 ADMIN_PASSWORD=your_secure_password_here
 PORT=3000
-HOST=localhost
 MAX_UPLOAD_MB=200
 MAX_BACKGROUND_MB=20
+GALLERY_DIR=./data
+TRUST_PROXY=1
 EOF
 ```
 
-### 3. Start the container
+### 3. Download docker-compose.yml
+
+```bash
+curl -O https://raw.githubusercontent.com/apadua/metransfer/main/docker-compose.yml
+```
+
+### 4. Start the container
 
 ```bash
 docker compose up -d
@@ -62,6 +70,7 @@ All settings live in `.env`. Copy `.env.example` to get started — never commit
 | `MAX_UPLOAD_MB` | `200` | Max size per photo file, in MB |
 | `MAX_BACKGROUND_MB` | `20` | Max size for background images, in MB |
 | `GALLERY_DIR` | `./data` | Host path mounted into the container as `/data`. Set to any writable path on your host (Docker only). |
+| `TRUST_PROXY` | `0` | Set to `1` when running behind a reverse proxy (Nginx, Caddy, Traefik). Enables correct client IP detection for rate limiting and HTTPS detection. Docker Compose default: `1`. |
 
 ---
 
@@ -71,7 +80,7 @@ All settings live in `.env`. Copy `.env.example` to get started — never commit
 2. **Log in** — enter your admin password
 3. **Enter an Event Name** — e.g. "Johnson Wedding" or "Senior Photos — Sarah"
 4. **Upload Photos** — drag and drop files or entire folders onto the upload zone
-5. **Add a Background** *(optional)* — click "Choose Background" to upload a hero image shown on the client page
+5. **Add a Background** *(optional)* — upload a hero image shown on the client page
 6. **Create Gallery** — click "Create Gallery & Get Link"
 7. **Share** — copy the generated link and send it to your client
 
@@ -80,8 +89,8 @@ All settings live in `.env`. Copy `.env.example` to get started — never commit
 When your client opens the link they see:
 - Your custom background image (if uploaded)
 - The event name as the page title
-- A single "Download All" button
-- Their photos arrive as one ZIP file
+- A **"Browse Photos"** button that opens a thumbnail grid with a full-screen lightbox and individual download
+- A **"Download All"** button — all photos arrive as one ZIP file
 
 ---
 
@@ -115,6 +124,7 @@ server {
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
 
@@ -139,6 +149,8 @@ sudo certbot --nginx -d photos.yourdomain.com
 ```
 
 Certbot will automatically renew the certificate. MeTransfer is now accessible at `https://photos.yourdomain.com`.
+
+Make sure `TRUST_PROXY=1` is set in your `.env` so that rate limiting and HTTPS detection use the real client IP and protocol rather than the proxy's.
 
 ---
 
@@ -235,14 +247,18 @@ metransfer/
 ├── .env.example        # Template for new installs
 ├── public/
 │   ├── admin.html      # Photographer dashboard
-│   └── customer.html   # Client download page
+│   ├── customer.html   # Client download page
+│   ├── preview.html    # Photo browser — thumbnail grid + lightbox
+│   └── logo.png        # Logo displayed on the client page
 └── data/               # Runtime data (Docker volume mount)
     ├── uploads/        # Gallery photos, organised by gallery ID
-    ├── backgrounds/    # Background images, one per gallery
+    ├── backgrounds/    # Background images, one per gallery (JPEG)
+    ├── thumbnails/     # 400px preview thumbnails, generated automatically
+    ├── og-cache/       # 1200×630 OG images, generated on first share
     └── galleries.json  # Gallery metadata
 ```
 
-`data/`, `uploads/`, `backgrounds/`, and `galleries.json` are gitignored — they contain user data, not source code.
+`data/` and its contents are gitignored — they contain user data, not source code.
 
 ---
 
@@ -251,15 +267,22 @@ metransfer/
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | `GET` | `/` | — | Admin dashboard |
+| `GET` | `/download/:id` | — | Client download page (with OG meta tags) |
+| `GET` | `/preview/:id` | — | Photo preview page (with OG meta tags) |
 | `POST` | `/api/auth/verify` | — | Verify admin password |
 | `POST` | `/api/gallery/create` | ✓ | Create gallery and upload photos |
 | `POST` | `/api/gallery/:id/upload` | ✓ | Add photos to existing gallery |
-| `POST` | `/api/gallery/:id/background` | ✓ | Upload background image |
-| `GET` | `/api/gallery/:id/info` | — | Gallery metadata (used by client page) |
+| `POST` | `/api/gallery/:id/background` | ✓ | Upload/replace background image |
+| `POST` | `/api/gallery/:id/rename` | ✓ | Rename a gallery |
+| `GET` | `/api/gallery/:id/info` | — | Gallery metadata |
+| `GET` | `/api/gallery/:id/photos` | — | List photos with URLs (used by preview page) |
+| `GET` | `/api/gallery/:id/photo/:filename` | — | Serve photo; add `?thumb=1` for 400px thumbnail |
 | `GET` | `/api/gallery/:id/download` | — | Download all photos as ZIP |
+| `GET` | `/api/gallery/:id/download/:filename` | — | Download a single photo |
+| `GET` | `/api/gallery/:id/background` | — | Serve background image |
+| `GET` | `/api/gallery/:id/og-image` | — | Serve/generate 1200×630 OG image |
 | `GET` | `/api/galleries` | ✓ | List all galleries |
 | `DELETE` | `/api/gallery/:id` | ✓ | Delete a gallery |
-| `GET` | `/download/:id` | — | Client download page |
 
 Authenticated endpoints require the `X-Admin-Password` header.
 

@@ -56,6 +56,39 @@
             margin-bottom: 8px;
         }
 
+        .logo-wrap {
+            display: inline-block;
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+        .logo-wrap img {
+            display: block;
+            height: 64px;
+            width: auto;
+        }
+
+        .logo-wrap .logo-hint {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.55);
+            color: var(--text-primary);
+            font-size: 0.72rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            opacity: 0;
+            transition: opacity 0.18s;
+            border-radius: 4px;
+        }
+
+        .logo-wrap:hover .logo-hint {
+            opacity: 1;
+        }
+
         .subtitle {
             color: var(--text-secondary);
             font-size: 1rem;
@@ -784,7 +817,11 @@
 
     <div class="container">
         <header>
-            <h1>MeTransfer</h1>
+            <div class="logo-wrap" onclick="document.getElementById('logoInput').click()" title="Click to change logo">
+                <img src="/api/logo" alt="Logo" id="adminLogo">
+                <span class="logo-hint">Change logo</span>
+            </div>
+            <input type="file" id="logoInput" accept="image/*,.svg" style="display:none">
             <p class="subtitle">Create beautiful download links for your clients</p>
         </header>
 
@@ -1138,6 +1175,26 @@
             document.getElementById('resultSection').classList.remove('visible');
             document.getElementById('uploadSection').style.display = 'block';
         }
+
+        document.getElementById('logoInput').addEventListener('change', async function () {
+            const file = this.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('logo', file);
+            try {
+                const res = await fetch('/api/logo', {
+                    method: 'POST',
+                    headers: { 'X-Admin-Password': adminPassword },
+                    body: formData
+                });
+                if (!res.ok) throw new Error('Upload failed');
+                // Bust the cache so the new logo renders immediately
+                document.getElementById('adminLogo').src = '/api/logo?t=' + Date.now();
+            } catch (err) {
+                alert('Logo upload failed: ' + err.message);
+            }
+            this.value = '';
+        });
 
         function escapeHtml(str) {
             const d = document.createElement('div');
