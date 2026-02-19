@@ -14,6 +14,22 @@ A self-hosted photo delivery platform for photographers. Upload photos, share a 
 
 ---
 
+## Screenshots
+
+### Admin Dashboard
+![Admin Dashboard](docs/screenshots/admin.png)
+
+### Gallery Created
+![Gallery Created](docs/screenshots/gallery-created.png)
+
+### Client Download Page
+![Client Download Page](docs/screenshots/customer-download.png)
+
+### Client Photo Preview
+![Client Photo Preview](docs/screenshots/customer-preview.png)
+
+---
+
 ## Quick Start (Docker Compose)
 
 This is the recommended installation method. You only need Docker installed.
