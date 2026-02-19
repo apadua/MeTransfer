@@ -65,7 +65,7 @@
 
         .logo-wrap img {
             display: block;
-            height: 64px;
+            height: 128px;
             width: auto;
         }
 
@@ -87,6 +87,23 @@
 
         .logo-wrap:hover .logo-hint {
             opacity: 1;
+        }
+
+        .logo-reset {
+            display: none;
+            margin-top: 6px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .logo-reset:hover {
+            color: var(--error);
         }
 
         .subtitle {
@@ -822,6 +839,7 @@
                 <span class="logo-hint">Change logo</span>
             </div>
             <input type="file" id="logoInput" accept="image/*,.svg" style="display:none">
+            <button class="logo-reset" id="logoResetBtn" onclick="resetLogo()">Reset to default</button>
             <p class="subtitle">Create beautiful download links for your clients</p>
         </header>
 
@@ -861,7 +879,7 @@
             
             <div class="bg-upload-section">
                 <div class="section-title">
-                    <span>2</span> Cover Image (Optional)
+                    <span>2</span> Event Cover Image (Optional)
                 </div>
                 <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 12px;">
                     Add a hero image for the customer's download page
@@ -914,6 +932,7 @@
             adminPassword = savedPassword;
             document.getElementById('loginModal').classList.add('hidden');
             loadGalleries();
+            checkLogoState();
         }
 
         // Handle password input enter key
@@ -935,6 +954,7 @@
                     sessionStorage.setItem('adminPassword', password);
                     document.getElementById('loginModal').classList.add('hidden');
                     loadGalleries();
+                    checkLogoState();
                 } else {
                     document.getElementById('loginError').style.display = 'block';
                 }
@@ -1176,6 +1196,29 @@
             document.getElementById('uploadSection').style.display = 'block';
         }
 
+        async function checkLogoState() {
+            try {
+                const res = await fetch('/api/logo', { method: 'HEAD' });
+                const isCustom = res.headers.get('X-Custom-Logo') === '1';
+                document.getElementById('logoResetBtn').style.display = isCustom ? 'block' : 'none';
+            } catch (_) {}
+        }
+
+        async function resetLogo() {
+            if (!confirm('Reset logo to the built-in default?')) return;
+            try {
+                const res = await fetch('/api/logo', {
+                    method: 'DELETE',
+                    headers: { 'X-Admin-Password': adminPassword }
+                });
+                if (!res.ok) throw new Error('Reset failed');
+                document.getElementById('adminLogo').src = '/api/logo?t=' + Date.now();
+                document.getElementById('logoResetBtn').style.display = 'none';
+            } catch (err) {
+                alert('Logo reset failed: ' + err.message);
+            }
+        }
+
         document.getElementById('logoInput').addEventListener('change', async function () {
             const file = this.files[0];
             if (!file) return;
@@ -1188,8 +1231,8 @@
                     body: formData
                 });
                 if (!res.ok) throw new Error('Upload failed');
-                // Bust the cache so the new logo renders immediately
                 document.getElementById('adminLogo').src = '/api/logo?t=' + Date.now();
+                document.getElementById('logoResetBtn').style.display = 'block';
             } catch (err) {
                 alert('Logo upload failed: ' + err.message);
             }

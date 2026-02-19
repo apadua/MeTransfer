@@ -9,6 +9,7 @@ A self-hosted photo delivery platform for photographers. Upload photos, share a 
 - **Photo Preview Page** — thumbnail grid with full-screen lightbox, keyboard/touch navigation, and individual photo download
 - **ZIP Downloads** — all photos packaged into a single named download
 - **Gallery Management** — rename galleries inline, set cover images, copy links, delete from the dashboard
+- **Custom Logo** — upload your own logo from the dashboard; shown on both admin and client pages; revert to default anytime
 - **Social Media Previews** — auto-generated OG images (1200×630) injected into share links
 - **No Database Required** — file-based storage, simple to deploy and back up
 
@@ -265,12 +266,13 @@ metransfer/
 │   ├── admin.html      # Photographer dashboard
 │   ├── customer.html   # Client download page
 │   ├── preview.html    # Photo browser — thumbnail grid + lightbox
-│   └── logo.png        # Logo displayed on the client page
+│   └── logo.svg        # Default logo (replaced at runtime by a custom upload)
 └── data/               # Runtime data (Docker volume mount)
     ├── uploads/        # Gallery photos, organised by gallery ID
     ├── backgrounds/    # Background images, one per gallery (JPEG)
     ├── thumbnails/     # 400px preview thumbnails, generated automatically
     ├── og-cache/       # 1200×630 OG images, generated on first share
+    ├── logo.*          # Custom logo if uploaded (overrides logo.svg)
     └── galleries.json  # Gallery metadata
 ```
 

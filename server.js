@@ -304,8 +304,12 @@ const LOGO_CONTENT_TYPES = {
     '.webp': 'image/webp',
 };
 
+const LOGO_EXTS = ['.svg', '.png', '.jpg', '.jpeg', '.gif', '.webp'];
+
 app.get('/api/logo', (_req, res) => {
     const custom = findLogoFile();
+    // X-Custom-Logo lets the admin page know whether a custom logo is active
+    res.setHeader('X-Custom-Logo', custom ? '1' : '0');
     if (custom) {
         const ext = path.extname(custom).toLowerCase();
         res.setHeader('Content-Type', LOGO_CONTENT_TYPES[ext] || 'application/octet-stream');
@@ -321,17 +325,23 @@ app.post('/api/logo', requireAuth, uploadLogo.single('logo'), (req, res) => {
         return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    // Delete any existing custom logo files
-    const LOGO_EXTS = ['.svg', '.png', '.jpg', '.jpeg', '.gif', '.webp'];
     for (const ext of LOGO_EXTS) {
         const p = path.join(DATA_DIR, `logo${ext}`);
         if (fs.existsSync(p)) fs.unlinkSync(p);
     }
 
     const ext = path.extname(req.file.originalname).toLowerCase();
-    const dest = path.join(DATA_DIR, `logo${ext}`);
-    fs.writeFileSync(dest, req.file.buffer);
+    fs.writeFileSync(path.join(DATA_DIR, `logo${ext}`), req.file.buffer);
 
+    res.json({ success: true });
+});
+
+// Reset logo to the bundled default (admin only)
+app.delete('/api/logo', requireAuth, (_req, res) => {
+    for (const ext of LOGO_EXTS) {
+        const p = path.join(DATA_DIR, `logo${ext}`);
+        if (fs.existsSync(p)) fs.unlinkSync(p);
+    }
     res.json({ success: true });
 });
 
